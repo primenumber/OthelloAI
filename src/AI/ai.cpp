@@ -61,12 +61,12 @@ int dfs(const board::Board& board, const board::State state, const int depth,
 
 constexpr std::array<int, 64> dfs_depth_array{{
   0, 0, 0, 0,
-  0, 0, 6, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
- 10, 9, 8, 7, 6, 5, 5, 5, 5, 5
+  0, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+ 10, 9, 8, 7, 6, 6, 6, 6, 6, 6
 }};
 
 #else
@@ -127,23 +127,26 @@ int main() {
     Board board = toBoard(board_str);
     auto stones = countBoard(board);
     int stone_num = stones.first + stones.second;
-    std::vector<Position> puttable_list = getPuttable(toBoard(board_str), state);
-    int num = puttable_list.size();
     Position pos;
-    int alpha = -1000000;
-    const int beta = 1000000;
-    for (Position puttable : puttable_list) {
-      int value = -dfs(put(toBoard(board_str), puttable, state),
-                       invertState(state), dfs_depth_array[stone_num],
-                       -beta, -alpha);
-      if (value > alpha) {
-        pos = puttable;
-        alpha = value;
+    if (stone_num == 4) {
+      cout << "f5" << endl;
+    } else {
+      std::vector<Position> puttable_list = getPuttable(toBoard(board_str), state);
+      int alpha = -1000000;
+      const int beta = 1000000;
+      for (Position puttable : puttable_list) {
+        int value = -dfs(put(toBoard(board_str), puttable, state),
+                         invertState(state), dfs_depth_array[stone_num],
+                         -beta, -alpha);
+        if (value > alpha) {
+          pos = puttable;
+          alpha = value;
+        }
       }
+      char col = posToXY(pos).first + 'a';
+      char row = posToXY(pos).second + '1';
+      cout << col << row << endl;
     }
-    char col = posToXY(pos).first + 'a';
-    char row = posToXY(pos).second + '1';
-    cout << col << row << endl;
     fprintf(fp, "%c%c\n", col, row);
   }
   fprintf(fp, "--game set--\n");

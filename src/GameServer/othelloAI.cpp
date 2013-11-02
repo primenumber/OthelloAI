@@ -32,7 +32,6 @@ bool OthelloAI::Init(board::State state, std::chrono::nanoseconds init_time) {
   wait_tv.tv_nsec = init_time.count() % 1000000000;
   nanosleep(&wait_tv, nullptr);
   ai_file_descriptor_ = open(named_pipe_name_.c_str(), O_RDONLY);
-  std::cerr << "fd:" << ai_file_descriptor_ << std::endl;
   state_ = state;
   return true;
 }
@@ -88,14 +87,16 @@ void OthelloAI::End() {
   std::fprintf(ai_pipe_.get(), "%lld\n", 0);
 }
 
-board::Position Human::Play(board::Board& board, std::chrono::nanoseconds remain_time) {
+board::Position Human::Play(board::Board& board,
+                            std::chrono::nanoseconds remain_time) {
   using std::cout;
   using std::cin;
   using std::endl;
   using std::find;
   using board::xyToPos;
+  using board::toStr_EasyToRead;
   std::vector<board::Position> puttable = getPuttable(board, state_);
-  cout << toStr(board) << endl;
+  cout << toStr_EasyToRead(board) << endl;
   board::Position pos;
   do {
     cout << "Input Position ("

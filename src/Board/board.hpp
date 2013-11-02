@@ -80,6 +80,7 @@ std::vector<Position> getPuttable(const Board&, State,
 std::vector<Position> getUnput(const Board&);
 Board put(const Board&, Position, State);
 std::string toStr(const Board&);
+std::string toStr_EasyToRead(const Board&);
 Board toBoard(const std::string&);
 std::pair<int, int> countBoard(const Board&);
 std::string toStr(const State&);

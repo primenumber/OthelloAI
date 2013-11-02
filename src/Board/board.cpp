@@ -113,6 +113,34 @@ std::string toStr(const Board & board) {
   return ss.str();
 }
 
+std::string toStr_EasyToRead(const Board & board) {
+  std::stringstream ss;
+  ss << " |a b c d e f g h\n";
+  ss << "-+---------------\n";
+  for (int i = 0; i < 8; ++i) {
+    ss << (i+1) << '|';
+    for (int j = 0; j < 8; ++j) {
+      if(j)
+        ss << ' ';
+      Position pos = xyToPos(j, i);
+      switch (board[pos]) {
+       case State::NONE:
+        ss << '.';
+        break;
+       case State::BLACK:
+        ss << 'x';
+        break;
+       case State::WHITE:
+        ss << 'o';
+        break;
+        default:;
+      }
+    }
+    ss << '\n';
+  }
+  return ss.str();
+}
+
 Board toBoard(const std::string & str) {
   std::stringstream ss;
   ss << str;

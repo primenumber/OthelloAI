@@ -115,6 +115,8 @@ bool GameServer::GamePlay() {
   using std::cerr;
   using std::endl;
   using board::toStr;
+  using board::toStr_EasyToRead;
+  using board::posToXY;
   using board::getPuttable;
   auto v = getPuttable(board_, state_);
   if (v.empty()) {
@@ -129,13 +131,17 @@ bool GameServer::GamePlay() {
   pass = false;
   std::string call_str;
   board::Position pos;
-  cerr << toStr(board_) << endl;
+  cerr << toStr_EasyToRead(board_) << endl;
   if (state_ == board::State::BLACK) {
     pos = ai_black_->Play(board_, game_timer_.GetRemainNowPlaying());
   } else {
     pos = ai_white_->Play(board_, game_timer_.GetRemainNowPlaying());
   }
   if (pos != board::nullpos) {
+    auto xy = posToXY(pos);
+    char col = xy.first + 'a';
+    char row = xy.second + '1';
+    cerr << toStr(state_) << " : " << col << row << endl;
     board_ = put(board_, pos, state_);
     return true;
   } else {
@@ -154,7 +160,7 @@ bool GameServer::ShowResult() {
   using std::endl;
   using board::toStr;
   cout << "<Game Set>" << endl;
-  cout << toStr(board_) << endl;
+  cout << toStr_EasyToRead(board_) << endl;
   return true;
 }
 
@@ -164,6 +170,7 @@ bool GameServer::ShowResult() {
 int main(int argc, char** argv)
 {
   using othello::server::OthelloAI;
+  using othello::server::Human;
   using othello::server::GameServer;
   using othello::board::State;
   if (argc < 3) {
@@ -173,12 +180,20 @@ int main(int argc, char** argv)
   }
   std::string ai_name_black = argv[1];
   std::string ai_name_white = argv[2];
-  std::unique_ptr<OthelloAI> ai_black(new OthelloAI(ai_name_black,
-                                                     "othello_black.pipe",
-                                                     State::BLACK));
-  std::unique_ptr<OthelloAI> ai_white(new OthelloAI(ai_name_white,
-                                                     "othello_white.pipe",
-                                                     State::WHITE));
+  std::unique_ptr<OthelloAI> ai_black;
+  std::unique_ptr<OthelloAI> ai_white;
+  if(ai_name_black != "human") {
+    ai_black = std::unique_ptr<OthelloAI>(new OthelloAI(ai_name_black,
+        "othello_black.pipe", State::BLACK));
+  } else {
+    ai_black = std::unique_ptr<OthelloAI>(new Human(State::BLACK));
+  }
+  if(ai_name_white != "human") {
+    ai_white = std::unique_ptr<OthelloAI>(new OthelloAI(ai_name_white,
+        "othello_white.pipe", State::WHITE));
+  } else {
+    ai_white = std::unique_ptr<OthelloAI>(new Human(State::WHITE));
+  }
   GameServer game_server(std::move(ai_black), std::move(ai_white));
   bool i = game_server.Init();
   bool s = false;
