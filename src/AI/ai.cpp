@@ -130,6 +130,7 @@ int main() {
     Position pos;
     if (stone_num == 4) {
       cout << "f5" << endl;
+      fprintf(fp, "f5\n");
     } else {
       std::vector<Position> puttable_list = getPuttable(toBoard(board_str), state);
       int alpha = -1000000;
@@ -146,8 +147,8 @@ int main() {
       char col = posToXY(pos).first + 'a';
       char row = posToXY(pos).second + '1';
       cout << col << row << endl;
+      fprintf(fp, "%c%c\n", col, row);
     }
-    fprintf(fp, "%c%c\n", col, row);
   }
   fprintf(fp, "--game set--\n");
   fclose(fp);
