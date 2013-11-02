@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -32,15 +33,15 @@ int dfs(const board::Board& board, const board::State state, const int depth,
   using othello::board::getPuttable;
   using othello::board::invertState;
   if (depth > 0) {
-    std::vector<Position> puttable_list = getPuttable(board, state);
-    if (puttable_list.empty()) {
+    std::vector<Position> pos_list = getPuttable(board, state);
+    if (pos_list.empty()) {
       if (pass) {
         return CalcWinPoint(board, state);
       } else {
         return -dfs(board, invertState(state), depth, -beta, -alpha, true);
       }
     }
-    for (Position puttable : puttable_list) {
+    for (Position puttable : pos_list) {
       int value = -dfs(put(board, puttable, state), invertState(state), depth-1,
                        -beta, -alpha);
       alpha = std::max(alpha, value);
@@ -132,16 +133,23 @@ int main() {
       cout << "f5" << endl;
       fprintf(fp, "f5\n");
     } else {
-      std::vector<Position> puttable_list = getPuttable(toBoard(board_str), state);
-      int alpha = -1000000;
-      const int beta = 1000000;
-      for (Position puttable : puttable_list) {
-        int value = -dfs(put(toBoard(board_str), puttable, state),
-                         invertState(state), dfs_depth_array[stone_num],
-                         -beta, -alpha);
-        if (value > alpha) {
-          pos = puttable;
-          alpha = value;
+      std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
+      auto begin_search = std::chrono::system_clock::now();
+      for (int i = 1; i <= 20; ++i) {
+        int alpha = -1000000;
+        const int beta = 1000000;
+        for (Position puttable : pos_list) {
+          int value = -dfs(put(toBoard(board_str), puttable, state),
+                           invertState(state), i, -beta, -alpha);
+          if (value > alpha) {
+            pos = puttable;
+            alpha = value;
+          }
+        }
+        auto now = std::chrono::system_clock::now();
+        if(now - begin_search > std::chrono::milliseconds(2000)) {
+          fprintf(fp, "depth:%d\n", i);
+          break;
         }
       }
       char col = posToXY(pos).first + 'a';
