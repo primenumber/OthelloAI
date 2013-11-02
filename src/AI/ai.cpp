@@ -26,8 +26,8 @@ int CalcWinPoint(const board::Board& board, const board::State state) {
   }
 }
 
-int dfs(const board::Board& board, const board::State state, int depth,
-        bool pass = false) {
+int dfs(const board::Board& board, const board::State state, const int depth,
+        int alpha, const int beta, const bool pass = false) {
   using othello::board::Position;
   using othello::board::getPuttable;
   using othello::board::invertState;
@@ -37,15 +37,17 @@ int dfs(const board::Board& board, const board::State state, int depth,
       if (pass) {
         return CalcWinPoint(board, state);
       } else {
-        return -dfs(board, invertState(state), depth, true);
+        return -dfs(board, invertState(state), depth, -beta, -alpha, true);
       }
     }
-    int max_value = -1000000;
     for (Position puttable : puttable_list) {
-      int value = -dfs(put(board, puttable, state), invertState(state), depth-1);
-      max_value = std::max(max_value, value);
+      int value = -dfs(put(board, puttable, state), invertState(state), depth-1,
+                       -beta, -alpha);
+      alpha = std::max(alpha, value);
+      if (alpha >= beta)
+        return alpha;
     }
-    return max_value;
+    return alpha;
   } else {
     value::CalcValue cv;
     return cv(board, state);
@@ -128,13 +130,15 @@ int main() {
     std::vector<Position> puttable_list = getPuttable(toBoard(board_str), state);
     int num = puttable_list.size();
     Position pos;
-    int max_value = -1000000;
+    int alpha = -1000000;
+    const int beta = 1000000;
     for (Position puttable : puttable_list) {
       int value = -dfs(put(toBoard(board_str), puttable, state),
-                       invertState(state), dfs_depth_array[stone_num]);
-      if (value > max_value) {
+                       invertState(state), dfs_depth_array[stone_num],
+                       -beta, -alpha);
+      if (value > alpha) {
         pos = puttable;
-        max_value = value;
+        alpha = value;
       }
     }
     char col = posToXY(pos).first + 'a';
