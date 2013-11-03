@@ -173,6 +173,8 @@ int main(int argc, char** argv)
   using othello::server::Human;
   using othello::server::GameServer;
   using othello::board::State;
+  using std::cerr;
+  using std::endl;
   if (argc < 3) {
     cerr << "error: no input programs" << endl;
     cerr << "usage: ogs PROG1 PROG2" << endl;
