@@ -174,8 +174,10 @@ int main(int argc, char** argv)
   using othello::server::GameServer;
   using othello::board::State;
   if (argc < 3) {
-    fprintf(stderr,"error: no input programs\nusage:\nothello PROG1 PROG2\n");
-    fflush(stderr);
+    cerr << "error: no input programs" << endl;
+    cerr << "usage: ogs PROG1 PROG2" << endl;
+    cerr << "if PROG1=human, Black will play human," << endl;
+    cerr << "if PROG2=human, White will play human." << endl;
     exit(EXIT_FAILURE);
   }
   std::string ai_name_black = argv[1];

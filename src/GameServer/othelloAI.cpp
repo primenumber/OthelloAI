@@ -84,7 +84,7 @@ board::Position OthelloAI::Play(board::Board& board,
 }
 
 void OthelloAI::End() {
-  std::fprintf(ai_pipe_.get(), "%lld\n", 0);
+  std::fprintf(ai_pipe_.get(), "%lld\n", 0ll);
 }
 
 board::Position Human::Play(board::Board& board,
