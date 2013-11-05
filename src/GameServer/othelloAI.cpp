@@ -75,9 +75,9 @@ board::Position OthelloAI::Play(board::Board& board,
     } else if(isPuttable(board, xyToPos(col, row), state_))
       return xyToPos(col, row);
     else {
-      std::cerr << "unputtable output" << std::endl;
+      std::cerr << "unputtable output:" << col << ':' << row << std::endl;
       return board::nullpos;
-     }
+    }
   } else {
     return board::nullpos;
   }

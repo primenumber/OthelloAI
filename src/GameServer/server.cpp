@@ -39,19 +39,13 @@ class GameServer {
  public:
   GameServer(std::unique_ptr<OthelloAI>&& ai_black,
              std::unique_ptr<OthelloAI>&& ai_white) noexcept
-//      : pipe_name_black_(pipe_name_black),
-//        pipe_name_white_(pipe_name_white), 
-//        ai_name_black_(ai_name_black),
-//        ai_name_white_(ai_name_white),
-//        ai_black_(board::State::BLACK),
-//        ai_white_(board::State::WHITE),
       : ai_black_(std::move(ai_black)),
         ai_white_(std::move(ai_white)),
         board_(),
         state_(board::State::BLACK),
         pass(false),
         record_(),
-        time_limit_(5000),
+        time_limit_(300),
         game_timer_(std::chrono::seconds(time_limit_)),
         is_initialized_(false),
         is_game_ended_(false) {}
@@ -64,12 +58,6 @@ class GameServer {
  private:
    std::unique_ptr<OthelloAI> ai_black_;
    std::unique_ptr<OthelloAI> ai_white_;
-//  std::string pipe_name_black_;
-//  std::string pipe_name_white_;
-//  std::string ai_name_black_;
-//  std::string ai_name_white_;
-//  OthelloAI ai_black_;
-//  OthelloAI ai_white_;
   board::Board board_;
   board::State state_;
   bool pass;

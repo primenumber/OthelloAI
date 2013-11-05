@@ -184,7 +184,7 @@ std::pair<int,int> countBoard(const Board & board) {
   return std::make_pair(b, w);
 }
 
-std::string toStr(const State& state) {
+std::string toStr(const State state) {
   switch(state) {
    case State::NONE:
     return "NONE";
@@ -195,6 +195,13 @@ std::string toStr(const State& state) {
    case State::WALL:
     return "WALL";
   }
+}
+
+std::string toStr(const Position position) {
+  auto xy = posToXY(position);
+  char col = xy.first + 'a';
+  char row = xy.second + '1';
+  return std::string("") + col + row;
 }
 
 } // namespace board

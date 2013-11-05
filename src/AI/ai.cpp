@@ -12,13 +12,57 @@
 #include <unistd.h>
 #include "Board/board.hpp"
 #include "value.hpp"
+#include "gameTree.hpp"
+#include "dfs.hpp"
 
-#define SLOW_ENV
+FILE* fp;
 
 namespace othello {
 namespace ai {
 
-int CalcWinPoint(const board::Board& board, const board::State state) {
+class Search {
+ public:
+  Search(board::State player_state)
+      : board_(), player_state_(player_state), now_state_(board::State::BLACK),
+        optimal_(),
+        game_tree_root_(new GameTree(board_, board::State::BLACK, board::nullpos,
+                                     CalcValue, CalcWinPoint)),
+        depth(0) { Calc(std::chrono::milliseconds(100)); }
+  void Put(board::Position);
+  void Calc(std::chrono::milliseconds calc_time);
+  board::Position GetOptimalPosition() { return optimal_; }
+  const board::Board& GetBoard() const { return board_; }
+ private:
+  int dfs(const board::Board& board, const board::State state, const int depth,
+          int alpha, const int beta, const bool pass = false);
+  static int CalcWinPoint(const board::Board& board, const board::State state);
+  static int CalcValue(const board::Board& board, const board::State state) {
+    value::CalcValue cv;
+    return cv(board, state);
+  }
+  board::Board board_;
+  board::State player_state_;
+  board::State now_state_;
+  board::Position optimal_;
+  std::unique_ptr<GameTree> game_tree_root_;
+  int depth;
+};
+
+void Search::Put(board::Position position) {
+  using board::toStr;
+  board_ = board::put(board_, position, now_state_);
+  now_state_ = board::invertState(now_state_);
+  --depth;
+  for(int i = 0; i < game_tree_root_->children_.size(); ++i) {
+    if(game_tree_root_->children_[i]->position_ == position) {
+      GameTree* tmp = game_tree_root_->children_[i].release();
+      game_tree_root_.reset(tmp);
+      break;
+    }
+  }
+}
+
+int Search::CalcWinPoint(const board::Board& board, const board::State state) {
   auto num = countBoard(board); 
   if (state == board::State::BLACK) {
     return (num.first - num.second) * 1000;
@@ -27,62 +71,51 @@ int CalcWinPoint(const board::Board& board, const board::State state) {
   }
 }
 
-int dfs(const board::Board& board, const board::State state, const int depth,
-        int alpha, const int beta, const bool pass = false) {
-  using othello::board::Position;
-  using othello::board::getPuttable;
-  using othello::board::invertState;
-  if (depth > 0) {
-    std::vector<Position> pos_list = getPuttable(board, state);
-    if (pos_list.empty()) {
-      if (pass) {
-        return CalcWinPoint(board, state);
-      } else {
-        return -dfs(board, invertState(state), depth, -beta, -alpha, true);
-      }
+void Search::Calc(std::chrono::milliseconds calc_time) {
+  using board::Position;
+  using board::xyToPos;
+  std::vector<Position> pos_list = getPuttable(board_, player_state_);
+  auto begin_search = std::chrono::system_clock::now();
+  auto stones = countBoard(board_);
+  int stone_nums = stones.first + stones.second;
+  if (stone_nums <= 50) {
+    for (; depth <= 20; ++depth) {
+      int alpha = -1000000;
+      const int beta = 1000000;
+      game_tree_root_->Search(depth, -beta, -alpha, false);
+      auto now = std::chrono::system_clock::now();
+      if (now - begin_search > calc_time / 10)
+        break;
     }
-    for (Position puttable : pos_list) {
-      int value = -dfs(put(board, puttable, state), invertState(state), depth-1,
-                       -beta, -alpha);
-      alpha = std::max(alpha, value);
-      if (alpha >= beta)
-        return alpha;
-    }
-    return alpha;
   } else {
-    value::CalcValue cv;
-    return cv(board, state);
+    int alpha = -1000000;
+    const int beta = 1000000;
+    game_tree_root_->Search(14, -beta, -alpha, false);
   }
+  fprintf(fp ,"search:calc depth:%d\n", depth);
+  if (player_state_ == now_state_)
+    optimal_ = game_tree_root_->children_[0]->position_;
+  else
+    optimal_ = game_tree_root_->children_[0]->children_[0]->position_;
 }
 
 } // namespace ai
 } // namespace othello
 
-#ifdef SLOW_ENV
-
-constexpr std::array<int, 64> dfs_depth_array{{
-  0, 0, 0, 0,
-  0, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
- 10, 9, 8, 7, 6, 6, 6, 6, 6, 6
-}};
-
-#else
-
-constexpr std::array<int, 64> dfs_depth_array{{
-  0, 0, 0, 0,
-  0, 0, 8, 7, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6,16,15,14,13,12,11,
- 10, 9, 8, 7, 6, 5, 4, 4, 4, 4
-}};
-
-#endif
+othello::board::Position GetPut(const othello::board::Board& board_new,
+                                const othello::board::Board& board_old) {
+  using othello::board::Position;
+  using othello::board::State;
+  using othello::board::xyToPos;
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 8; ++j) {
+      Position pos = xyToPos(j, i);
+      if (board_old[pos] == State::NONE && board_new[pos] != State::NONE)
+        return pos;
+    }
+  }
+  return othello::board::nullpos;
+}
 
 int main() {
   using othello::board::Board;
@@ -93,14 +126,18 @@ int main() {
   using othello::board::posToXY;
   using othello::board::invertState;
   using othello::board::getPuttable;
+  using othello::board::toStr;
   using std::cin;
   using std::cout;
   using std::endl;
-  using othello::ai::dfs;
+  using std::chrono::duration_cast;
+  using std::chrono::milliseconds;
+  using std::chrono::nanoseconds;
+  using othello::ai::Search;
   srand(getpid());
   char buf[81];
   sprintf(buf, "ai01_log_%d.log", getpid());
-  FILE* fp = fopen(buf, "w");
+  fp = fopen(buf, "w");
   std::string player;
   cin >> player;
   State state;
@@ -111,6 +148,7 @@ int main() {
     fprintf(fp, "white\n");
     state = State::WHITE;
   }
+  Search search(state);
   while (1) {
     std::string rt_str;
     long long remain_time;
@@ -132,30 +170,18 @@ int main() {
     if (stone_num == 4) {
       cout << "f5" << endl;
       fprintf(fp, "f5\n");
+      search.Put(xyToPos(5, 4));
     } else {
+      Position enemy_put = GetPut(board, search.GetBoard());
       std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
-      auto begin_search = std::chrono::system_clock::now();
-      for (int i = 1; i <= 20; ++i) {
-        int alpha = -1000000;
-        const int beta = 1000000;
-        for (Position puttable : pos_list) {
-          int value = -dfs(put(toBoard(board_str), puttable, state),
-                           invertState(state), i, -beta, -alpha);
-          if (value > alpha) {
-            pos = puttable;
-            alpha = value;
-          }
-        }
-        auto now = std::chrono::system_clock::now();
-        if(now - begin_search > std::chrono::milliseconds(2000)) {
-          fprintf(fp, "depth:%d\n", i);
-          break;
-        }
-      }
-      char col = posToXY(pos).first + 'a';
-      char row = posToXY(pos).second + '1';
-      cout << col << row << endl;
-      fprintf(fp, "%c%c\n", col, row);
+      search.Put(enemy_put);
+      int remain_num = 64 - stone_num;
+      search.Calc(duration_cast<milliseconds>(
+          nanoseconds(remain_time)/remain_num));
+      pos = search.GetOptimalPosition();
+      cout << toStr(pos) << endl;
+      fprintf(fp, "%s\n", toStr(pos).c_str());
+      search.Put(pos);
     }
   }
   fprintf(fp, "--game set--\n");
