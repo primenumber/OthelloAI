@@ -50,7 +50,8 @@ class Search {
 
 void Search::Put(board::Position position) {
   using board::toStr;
-  board_ = board::put(board_, position, now_state_);
+  if(position != board::nullpos)
+    board_ = board::put(board_, position, now_state_);
   now_state_ = board::invertState(now_state_);
   --depth;
   for(int i = 0; i < game_tree_root_->children_.size(); ++i) {
@@ -172,8 +173,8 @@ int main() {
       fprintf(fp, "f5\n");
       search.Put(xyToPos(5, 4));
     } else {
-      Position enemy_put = GetPut(board, search.GetBoard());
       std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
+      Position enemy_put = GetPut(board, search.GetBoard());
       search.Put(enemy_put);
       int remain_num = 64 - stone_num;
       search.Calc(duration_cast<milliseconds>(
