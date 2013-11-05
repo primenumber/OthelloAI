@@ -12,7 +12,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
     value_ = value_func_(board_, state_);
     return value_;
   }
-  if (depth <= 4) {
+  if (depth <= 3) {
     value_ = dfs(board_, state_, depth, alpha, beta);
     return value_;
   }

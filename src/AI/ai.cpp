@@ -85,7 +85,7 @@ void Search::Calc(std::chrono::milliseconds calc_time) {
       const int beta = 1000000;
       game_tree_root_->Search(depth, -beta, -alpha, false);
       auto now = std::chrono::system_clock::now();
-      if (now - begin_search > calc_time / 10)
+      if (now - begin_search > calc_time / 6)
         break;
     }
   } else {
