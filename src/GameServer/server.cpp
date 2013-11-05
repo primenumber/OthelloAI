@@ -37,7 +37,8 @@ char toBase64(unsigned int n)
 
 class GameServer {
  public:
-  GameServer(std::unique_ptr<OthelloAI>&& ai_black,
+  GameServer(int time_limit_seconds,
+             std::unique_ptr<OthelloAI>&& ai_black,
              std::unique_ptr<OthelloAI>&& ai_white) noexcept
       : ai_black_(std::move(ai_black)),
         ai_white_(std::move(ai_white)),
@@ -45,7 +46,7 @@ class GameServer {
         state_(board::State::BLACK),
         pass(false),
         record_(),
-        time_limit_(300),
+        time_limit_(time_limit_seconds),
         game_timer_(std::chrono::seconds(time_limit_)),
         is_initialized_(false),
         is_game_ended_(false) {}
@@ -163,15 +164,16 @@ int main(int argc, char** argv)
   using othello::board::State;
   using std::cerr;
   using std::endl;
-  if (argc < 3) {
+  if (argc < 4) {
     cerr << "error: no input programs" << endl;
     cerr << "usage: ogs PROG1 PROG2" << endl;
     cerr << "if PROG1=human, Black will play human," << endl;
     cerr << "if PROG2=human, White will play human." << endl;
     exit(EXIT_FAILURE);
   }
-  std::string ai_name_black = argv[1];
-  std::string ai_name_white = argv[2];
+  int time_limit = atoi(argv[1]);
+  std::string ai_name_black = argv[2];
+  std::string ai_name_white = argv[3];
   std::unique_ptr<OthelloAI> ai_black;
   std::unique_ptr<OthelloAI> ai_white;
   if(ai_name_black != "human") {
@@ -186,7 +188,7 @@ int main(int argc, char** argv)
   } else {
     ai_white = std::unique_ptr<OthelloAI>(new Human(State::WHITE));
   }
-  GameServer game_server(std::move(ai_black), std::move(ai_white));
+  GameServer game_server(time_limit, std::move(ai_black), std::move(ai_white));
   bool i = game_server.Init();
   bool s = false;
   if(i) {
