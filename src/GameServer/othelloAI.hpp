@@ -1,14 +1,9 @@
 #pragma once
 
-#include <ctime>
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
-#include <fcntl.h>
-#include <sys/select.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include "Board/board.hpp"
 #include "fileDescriptor.hpp"
 #include "gametimer.hpp"

@@ -1,4 +1,11 @@
 #include "othelloAI.hpp"
+#include <ctime>
+#include <cstring>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace othello {
 namespace server {
@@ -18,7 +25,7 @@ bool OthelloAI::Init(board::State state, std::chrono::nanoseconds init_time) {
   std::string call_str = ai_name_ + " > " + named_pipe_name_;
   FILE* fp = popen(call_str.c_str(), "w");
   if (fp == nullptr) {
-    std::cerr << "open ai failed" << std::endl;
+    std::cerr << "open ai failed" << strerror(errno) << std::endl;
     return false;
   }
   ai_pipe_.reset(fp);
