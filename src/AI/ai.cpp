@@ -27,7 +27,7 @@ class Search {
         optimal_(),
         game_tree_root_(new GameTree(board_, board::State::BLACK, 4,
             board::nullpos, CalcValue, CalcWinPoint)),
-        depth(0) { Calc(std::chrono::milliseconds(100)); }
+        depth(4) { Calc(std::chrono::milliseconds(300)); }
   void Put(board::Position);
   void Calc(std::chrono::milliseconds calc_time);
   board::Position GetOptimalPosition() { return optimal_; }
@@ -165,6 +165,10 @@ int main() {
     Board board = toBoard(board_str);
     auto stones = countBoard(board);
     int stone_num = stones.first + stones.second;
+    int remain_num = 64 - stone_num;
+    nanoseconds calc_time = std::min(
+        nanoseconds(remain_time)/((remain_num+1)/2),
+        nanoseconds(20000000000));
     Position pos;
     if (stone_num == 4) {
       cout << "f5" << endl;
@@ -174,9 +178,7 @@ int main() {
       std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
       Position enemy_put = GetPut(board, search.GetBoard());
       search.Put(enemy_put);
-      int remain_num = 64 - stone_num;
-      search.Calc(duration_cast<milliseconds>(std::min(
-          nanoseconds(remain_time)/((remain_num+1)/2),nanoseconds(20000))));
+      search.Calc(duration_cast<milliseconds>(calc_time));
       pos = search.GetOptimalPosition();
       cout << toStr(pos) << endl;
       fprintf(fp, "%s\n", toStr(pos).c_str());
@@ -185,9 +187,7 @@ int main() {
       Position enemy_put = GetPut(board, search.GetBoard());
       search.Put(enemy_put);
       search.Put(othello::board::nullpos);
-      int remain_num = 64 - stone_num;
-      search.Calc(duration_cast<milliseconds>(std::min(
-          nanoseconds(remain_time)/((remain_num+1)/2),nanoseconds(20000))));
+      search.Calc(duration_cast<milliseconds>(calc_time));
     }
 //    search.Calc(milliseconds(1000));
   }
