@@ -9,11 +9,11 @@ int GameTree::Search(const int depth, int alpha, const int beta,
   using board::getPuttable;
   using board::invertState;
   if (depth <= 0) {
-    value_ = value_func_(board_, state_);
+    value_ = value_func_(board_, state_, stones_);
     return value_;
   }
   if (depth <= 3) {
-    value_ = dfs(board_, state_, depth, alpha, beta);
+    value_ = dfs(board_, state_, depth, alpha, beta, false, stones_);
     return value_;
   }
   if (uncalc_) {
@@ -21,10 +21,11 @@ int GameTree::Search(const int depth, int alpha, const int beta,
     if (pos_list.empty()) {
       pass_ = true;
       if (pass) {
-        value_ = win_point_func_(board_, state_);
+        value_ = win_point_func_(board_, state_, stones_);
       } else {
         auto child = std::unique_ptr<GameTree>(new GameTree(board_,
-            invertState(state_), board::nullpos, value_func_, win_point_func_));
+            invertState(state_), stones_, board::nullpos, value_func_,
+            win_point_func_));
         value_ = -child->Search(depth, -beta, -alpha, true);
         children_.emplace_back(std::move(child));
       }
@@ -32,7 +33,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
       auto itr = pos_list.begin();
       for (; itr != pos_list.end(); ++itr) {
         auto child = std::unique_ptr<GameTree>(new GameTree(
-            put(board_, *itr, state_), invertState(state_), *itr,
+            put(board_, *itr, state_), invertState(state_), stones_ + 1, *itr,
             value_func_, win_point_func_));
         int value = -child->Search(depth-1, -beta, -alpha, false);
         children_.emplace_back(std::move(child));
@@ -46,10 +47,11 @@ int GameTree::Search(const int depth, int alpha, const int beta,
       for(; itr != pos_list.end(); ++itr) {
         auto child = std::unique_ptr<GameTree>();
         children_.emplace_back(new GameTree(
-            put(board_, *itr, state_), invertState(state_), *itr,
+            put(board_, *itr, state_), invertState(state_), stones_, *itr,
             value_func_, win_point_func_));
       }
-      sort(children_.begin(), children_.begin() + searched_num, Comp_PtrGameTree);
+      sort(children_.begin(), children_.begin() + searched_num,
+           Comp_PtrGameTree);
       value_ = alpha;
     }
     uncalc_ = false;

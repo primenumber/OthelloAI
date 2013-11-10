@@ -3,8 +3,150 @@
 
 namespace othello {
 namespace board {
+/*
+constexpr int pow3(int index) {
+  return (index > 0) ? pow3(index-1) * 3 : 1;
+}
 
-bool isPuttable(const Board & board, Position pos, State state) {
+bool Board::IsPuttable(const uint64_t index_bit) const {
+  return 
+}
+
+uint64_t Board::GetPuttable(const State state) const {
+  uint64_t puttable = 0ll;
+  int state_num = (state == State::BLACK) ? 0 : 1;
+  for (int i = 0; i < 8; ++i) {
+    puttable |= puttable_table_[state_num][7][GetColBlack(i)][GetColWhite(i)]
+        << (7 - i) * 8;
+    puttable |= ToRowUint64(
+        puttable_table_[state_num][7][GetRowBlack(i)][GetRowWhite(i)])
+        << (7 - i);
+  }
+  for (int i = -5; i <= 5; ++i) {
+    puttable |= ToCrossUint64(
+        puttable_table_[state_num][8 - abs(i)]
+            [GetCross(State::BLACK, i, 1)][GetCross(State::WHITE, i, 1)],
+        1)
+        << (7 - i) * 8;
+  }
+  return puttable;
+}
+
+void Board::InitPuttableTable() {
+  for (int i = 3; i <= 8; ++i)
+    InitPuttableTableImpl(i);
+}
+
+uint8_t Board::GetCrossImpl(const uint64_t data, const int index,
+                        const int direction) const {
+  uint8_t result = 0;
+  if (direction == WHITE_LINE) {
+    for (int i = 0; i < 8 - abs(index); ++i)
+      result |= (data >> ((i + std::max(index, 0)) * 8)) && (1 << i);
+  } else {
+    for (int i = 0; i < 8 - abs(index); ++i)
+      result |= (data >> (((7 - i) + std::max(index, 0)) * 6)) && (1 << i);
+  }
+  return result;
+}
+
+template<int N>
+uint8_t Board::ToUint8(const std::array<State, N>& line,
+                       const State state) const {
+  uint8_t result = 0;
+  for (int i = 0; i < N; ++i)
+    result |= (line[i] == state) ? (1 << i) : 0;
+  return result;
+}
+
+template<int N>
+bool Board::IsPuttableLine(std::array<State, N> line, Position position,
+                           State state) const {
+  bool flag = false;
+  for (int k = position - 1; k >= 0; --k) {
+    if (state == table[k]) {
+      if (flag == true) {
+        return true;
+      }
+      break;
+    } else {
+      flag = true;
+    }
+  }
+  flag = false;
+  for (int k = position + 1; k < length; ++k) {
+    if (state == table[k]) {
+      if (flag == true) {
+        return true;
+      }
+      break;
+    } else {
+      flag = true;
+    }
+  }
+  return false;
+}
+
+template<int N>
+uint8_t Board::PuttableLine(const std::array<State, N>& line,
+                            const State state) const {
+  uint8_t array;
+  for (int i = 0; i < N; ++i)
+    array |= IsPutableLine(line, i, state) << i;
+  return array;
+}
+
+template<int N>
+std::array<State, N> Board::ToStateArray(int num) const {
+  std::array<State, N> array;
+  for (int i = 0; i < N; ++i) {
+    int mod = num % 3;
+    num /= 3;
+    switch (mod) {
+     case 0:
+      array[i] = State::NONE;
+      break;
+     case 1:
+      array[i] = State::BLACK;
+      break;
+     case 2:
+      array[i] = State::WHITE;
+      break;
+    }
+  }
+  return array;
+}
+
+void Board::InitPuttableTableImpl(int length) {
+  puttable_table_[0][length - 1] = std::vector<std::vector<uint8_t>>(
+      pow3(length), std::vector<uint8_t>(pow3(length)));
+  puttable_table_[1][length - 1] = std::vector<std::vector<uint8_t>>(
+      pow3(length), std::vector<uint8_t>(pow3(length)));
+  for (int i = 0; i < pow3(length); ++i) {
+    std::array<State, length> table = ToStateArray(i);
+    puttable_table_[0][length - 1][ToUint8(table,State::BLACK)]
+        [ToUint8(table,State::WHITE)] = PuttableLine(table, State::BLACK);
+    puttable_table_[1][length - 1][ToUint8(table,State::BLACK)]
+        [ToUint8(table,State::WHITE)] = PuttableLine(table, State::WHITE);
+  }
+}
+
+uint8_t Board::GetRowImpl(const uint64_t data) const {
+  uint8_t result = 0;
+  for (int i = 0; i < 8; ++i)
+    result |= (data >> (i * 7)) && (1 << i);
+  return result;
+}
+
+uint64_t Board::ToRowUint64(const uint64_t data) const {
+  uint64_t result;
+  for (int i = 0; i < 8; ++i) {
+    result |= (data & (1 << i)) << (i * 7);
+  }
+}
+*/
+bool isPuttable(const Board & board, const Position pos,
+                const State state) {
   if (board[pos] != State::NONE)
     return false;
   else {
@@ -42,7 +184,7 @@ std::vector<Position> getPuttable(const Board & board, State state) {
 }
 
 std::vector<Position> getPuttable(const Board & board, State state, 
-															 const std::vector<Position> & nonevec) {
+															    const std::vector<Position> & nonevec) {
   std::vector<Position> ans;
   ans.reserve(nonevec.size());
   for (auto pos : nonevec)

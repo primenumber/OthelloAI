@@ -55,13 +55,11 @@ board::Position OthelloAI::Play(board::Board& board,
   using board::toStr;
   using std::chrono::seconds;
   using std::chrono::nanoseconds;
-  using std::chrono::duration;
   std::fprintf(ai_pipe_.get(),
                "%lld\n%s",
                duration_cast<nanoseconds>(remain_time).count(), 
                toStr(board).c_str());
   fflush(ai_pipe_.get());
-  fflush(stdout);
   fd_set out_pipe_set;
   FD_ZERO(&out_pipe_set);
   FD_SET(ai_file_descriptor_, &out_pipe_set);
@@ -88,6 +86,17 @@ board::Position OthelloAI::Play(board::Board& board,
   } else {
     return board::nullpos;
   }
+}
+
+void OthelloAI::Pass(board::Board& board,
+                     std::chrono::nanoseconds remain_time) {
+  using std::chrono::duration_cast;
+  using std::chrono::nanoseconds;
+  std::fprintf(ai_pipe_.get(),
+               "%lld\n%s",
+               duration_cast<nanoseconds>(remain_time).count(), 
+               toStr(board).c_str());
+  fflush(ai_pipe_.get());
 }
 
 void OthelloAI::End() {

@@ -117,7 +117,15 @@ bool GameServer::GamePlay() {
       return true;
     }
   }
-  pass = false;
+  if(pass) {
+    auto invert_state = GameTimer::InvertState(game_timer_.GetState());
+    if (invertState(state_) == board::State::BLACK) {
+      ai_black_->Pass(board_, game_timer_.GetRemain(invert_state));
+    } else {
+      ai_white_->Pass(board_, game_timer_.GetRemain(invert_state));
+    }
+    pass = false;
+  }
   std::string call_str;
   board::Position pos;
   cerr << toStr_EasyToRead(board_) << endl;
@@ -148,8 +156,17 @@ bool GameServer::ShowResult() {
   using std::cout;
   using std::endl;
   using board::toStr;
+  auto stones = countBoard(board_);
   cout << "<Game Set>" << endl;
   cout << toStr_EasyToRead(board_) << endl;
+  cout << "Black : " << stones.first << " White : " << stones.second << endl;
+  if (stones.first > stones.second) {
+    cout << "Winner : Black" << endl;
+  } else if ( stones.first < stones.second) {
+    cout << "Winner : White" << endl;
+  } else {
+    cout << "Draw" << endl;
+  }
   return true;
 }
 

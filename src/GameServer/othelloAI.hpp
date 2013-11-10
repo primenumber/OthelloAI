@@ -26,6 +26,7 @@ class OthelloAI {
   virtual void Reset();
   virtual board::Position Play(board::Board& board,
                                std::chrono::nanoseconds remain_time);
+  virtual void Pass(board::Board& board, std::chrono::nanoseconds remain_time);
   virtual void End();
  protected:
   board::State state_;

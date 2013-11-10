@@ -25,8 +25,8 @@ class Search {
   Search(board::State player_state)
       : board_(), player_state_(player_state), now_state_(board::State::BLACK),
         optimal_(),
-        game_tree_root_(new GameTree(board_, board::State::BLACK, board::nullpos,
-                                     CalcValue, CalcWinPoint)),
+        game_tree_root_(new GameTree(board_, board::State::BLACK, 4,
+            board::nullpos, CalcValue, CalcWinPoint)),
         depth(0) { Calc(std::chrono::milliseconds(100)); }
   void Put(board::Position);
   void Calc(std::chrono::milliseconds calc_time);
@@ -35,10 +35,12 @@ class Search {
  private:
   int dfs(const board::Board& board, const board::State state, const int depth,
           int alpha, const int beta, const bool pass = false);
-  static int CalcWinPoint(const board::Board& board, const board::State state);
-  static int CalcValue(const board::Board& board, const board::State state) {
+  static int CalcWinPoint(const board::Board& board, const board::State state,
+                          const int stones);
+  static int CalcValue(const board::Board& board, const board::State state,
+                       const int stones) {
     value::CalcValue cv;
-    return cv(board, state);
+    return cv(board, state, stones);
   }
   board::Board board_;
   board::State player_state_;
@@ -63,7 +65,8 @@ void Search::Put(board::Position position) {
   }
 }
 
-int Search::CalcWinPoint(const board::Board& board, const board::State state) {
+int Search::CalcWinPoint(const board::Board& board, const board::State state,
+                         const int /*stones*/) {
   auto num = countBoard(board); 
   if (state == board::State::BLACK) {
     return (num.first - num.second) * 1000;
@@ -79,19 +82,13 @@ void Search::Calc(std::chrono::milliseconds calc_time) {
   auto begin_search = std::chrono::system_clock::now();
   auto stones = countBoard(board_);
   int stone_nums = stones.first + stones.second;
-  if (stone_nums <= 50) {
-    for (; depth <= 20; ++depth) {
-      int alpha = -1000000;
-      const int beta = 1000000;
-      game_tree_root_->Search(depth, -beta, -alpha, false);
-      auto now = std::chrono::system_clock::now();
-      if (now - begin_search > calc_time / 6)
-        break;
-    }
-  } else {
+  for (; depth <= 20; ++depth) {
     int alpha = -1000000;
     const int beta = 1000000;
-    game_tree_root_->Search(14, -beta, -alpha, false);
+    game_tree_root_->Search(depth, -beta, -alpha, false);
+    auto now = std::chrono::system_clock::now();
+    if (now - begin_search > calc_time / 6)
+      break;
   }
   fprintf(fp ,"search:calc depth:%d\n", depth);
   if (player_state_ == now_state_)
@@ -135,6 +132,7 @@ int main() {
   using std::chrono::milliseconds;
   using std::chrono::nanoseconds;
   using othello::ai::Search;
+//  othello::board::Board::InitPuttableTable();
   srand(getpid());
   char buf[81];
   sprintf(buf, "ai01_log_%d.log", getpid());
@@ -172,18 +170,26 @@ int main() {
       cout << "f5" << endl;
       fprintf(fp, "f5\n");
       search.Put(xyToPos(5, 4));
-    } else {
+    } else if(!getPuttable(toBoard(board_str), state).empty()) {
       std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
       Position enemy_put = GetPut(board, search.GetBoard());
       search.Put(enemy_put);
       int remain_num = 64 - stone_num;
       search.Calc(duration_cast<milliseconds>(
-          nanoseconds(remain_time)/remain_num));
+          nanoseconds(remain_time)/((remain_num+1)/2)));
       pos = search.GetOptimalPosition();
       cout << toStr(pos) << endl;
       fprintf(fp, "%s\n", toStr(pos).c_str());
       search.Put(pos);
+    } else {
+      Position enemy_put = GetPut(board, search.GetBoard());
+      search.Put(enemy_put);
+      search.Put(othello::board::nullpos);
+      int remain_num = 64 - stone_num;
+      search.Calc(duration_cast<milliseconds>(
+          nanoseconds(remain_time)/((remain_num+1)/2)));
     }
+//    search.Calc(milliseconds(1000));
   }
   fprintf(fp, "--game set--\n");
   fclose(fp);

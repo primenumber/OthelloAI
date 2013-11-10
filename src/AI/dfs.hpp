@@ -10,7 +10,7 @@ int CalcWinPoint(const board::Board& board, const board::State state);
 
 int dfs(const board::Board& board, const board::State state,
         const int depth, int alpha, const int beta,
-        const bool pass = false);
+        const bool pass, const int stones);
 
 } // namespace ai
 } // namespace othello

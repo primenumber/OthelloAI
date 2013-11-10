@@ -15,22 +15,24 @@ int CalcWinPoint(const board::Board& board, const board::State state) {
 
 int dfs(const board::Board& board, const board::State state,
         const int depth, int alpha, const int beta,
-        const bool pass) {
+        const bool pass, const int stones) {
   using othello::board::Position;
   using othello::board::getPuttable;
   using othello::board::invertState;
+  using othello::board::State;
   if (depth > 0) {
     std::vector<Position> pos_list = getPuttable(board, state);
     if (pos_list.empty()) {
       if (pass) {
         return CalcWinPoint(board, state);
       } else {
-        return -dfs(board, invertState(state), depth, -beta, -alpha, true);
+        return -dfs(board, invertState(state), depth, -beta, -alpha, true,
+                    stones);
       }
     }
     for (Position puttable : pos_list) {
       int value = -dfs(put(board, puttable, state), invertState(state), depth-1,
-                       -beta, -alpha);
+                       -beta, -alpha, false, stones + 1);
       alpha = std::max(alpha, value);
       if (alpha >= beta)
         return alpha;
@@ -38,7 +40,7 @@ int dfs(const board::Board& board, const board::State state,
     return alpha;
   } else {
     value::CalcValue cv;
-    return cv(board, state);
+    return cv(board, state, stones);
   }
 }
 

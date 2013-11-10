@@ -10,13 +10,14 @@ namespace ai {
 
 class GameTree {
  public:
-  typedef std::function<int (const board::Board&, const board::State)> vfunc;
+  typedef std::function<int (const board::Board&, const board::State,
+      const int)> vfunc;
   GameTree(const board::Board& board, const board::State state,
-      const board::Position position, const vfunc& value_func,
+      const int stones, const board::Position position, const vfunc& value_func,
       const vfunc& win_point_func)
       : children_(), board_(board), state_(state), position_(position),
-        value_(), pass_(false), uncalc_(true), value_func_(value_func),
-        win_point_func_(win_point_func) {}
+        value_(), stones_(stones), pass_(false), uncalc_(true),
+        value_func_(value_func), win_point_func_(win_point_func) {}
   virtual ~GameTree() {}
   int Search(const int /*depth*/, int /*alpha*/, const int /*beta*/,
              const bool pass);
@@ -27,6 +28,7 @@ class GameTree {
   board::Position position_;
   int value_;
  private:
+  int stones_;
   bool pass_;
   bool uncalc_;
   vfunc value_func_;
