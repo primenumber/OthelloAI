@@ -175,8 +175,8 @@ int main() {
       Position enemy_put = GetPut(board, search.GetBoard());
       search.Put(enemy_put);
       int remain_num = 64 - stone_num;
-      search.Calc(duration_cast<milliseconds>(
-          nanoseconds(remain_time)/((remain_num+1)/2)));
+      search.Calc(duration_cast<milliseconds>(std::min(
+          nanoseconds(remain_time)/((remain_num+1)/2),nanoseconds(20000))));
       pos = search.GetOptimalPosition();
       cout << toStr(pos) << endl;
       fprintf(fp, "%s\n", toStr(pos).c_str());
@@ -186,8 +186,8 @@ int main() {
       search.Put(enemy_put);
       search.Put(othello::board::nullpos);
       int remain_num = 64 - stone_num;
-      search.Calc(duration_cast<milliseconds>(
-          nanoseconds(remain_time)/((remain_num+1)/2)));
+      search.Calc(duration_cast<milliseconds>(std::min(
+          nanoseconds(remain_time)/((remain_num+1)/2),nanoseconds(20000))));
     }
 //    search.Calc(milliseconds(1000));
   }

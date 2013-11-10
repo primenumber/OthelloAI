@@ -5,14 +5,14 @@ namespace value {
 constexpr std::array<int, board::kboard_table_size> value_table_ = 
     std::array<int, board::kboard_table_size>{{
        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-       0, 100, -50,  15,  15,  15,  15, -50, 100,   0,
-       0, -50, -50, -10, -10, -10, -10, -50, -50,   0,
+       0, 100, -40,  15,  15,  15,  15, -40, 100,   0,
+       0, -40, -50, -10, -10, -10, -10, -50, -40,   0,
        0,  15, -10,   5,  -5,  -5,   5, -10,  15,   0,
        0,  15, -10,  -5,  -5,  -5,  -5, -10,  15,   0,
        0,  15, -10,  -5,  -5,  -5,  -5, -10,  15,   0,
        0,  15, -10,   5,  -5,  -5,   5, -10,  15,   0,
-       0, -50, -50, -10, -10, -10, -10, -50, -50,   0,
-       0, 100, -50,  15,  15,  15,  15, -50, 100,   0,
+       0, -40, -50, -10, -10, -10, -10, -50, -40,   0,
+       0, 100, -40,  15,  15,  15,  15, -40, 100,   0,
        0,   0,   0,   0,   0,   0,   0,   0,   0,   0
     }};
 
@@ -31,7 +31,7 @@ int CalcValue::calc_table(const board::Board& board, board::State state) {
 }
 
 constexpr int settlements_value = 15;
-constexpr int edge_value[] = {0,0,0,0,15,-15,15};
+constexpr int edge_value[] = {0,0,0,0,6,-6,12};
 
 std::array<int, 2> stone_num_line(const board::Board& board,
     const int sx, const int sy, const int dx, const int dy) {

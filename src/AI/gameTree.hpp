@@ -20,7 +20,8 @@ class GameTree {
         value_func_(value_func), win_point_func_(win_point_func) {}
   virtual ~GameTree() {}
   int Search(const int /*depth*/, int /*alpha*/, const int /*beta*/,
-             const bool pass);
+             const bool /*pass*/);
+  int WinLoseSearch(const int /*depth*/,const bool pass);
   int GetValue() const { return value_; }
   std::vector<std::unique_ptr<GameTree>> children_;
   board::Board board_;
