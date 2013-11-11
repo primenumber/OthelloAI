@@ -46,6 +46,7 @@ class Human : public OthelloAI {
   void Reset() {}
   board::Position Play(board::Board& board,
                        std::chrono::nanoseconds remain_time);
+  void Pass(board::Board& board, std::chrono::nanoseconds remain_time) {};
   void End() {}
 };
 
