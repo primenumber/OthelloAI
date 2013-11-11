@@ -48,11 +48,13 @@ int main() {
     }
     std::vector<Position> puttable = getPuttable(toBoard(board_str), state);
     int num = puttable.size();
-    Position pos = puttable[rand()%num];
-    char col = posToXY(pos).first + 'a';
-    char row = posToXY(pos).second + '1';
-    cout << col << row << endl;
-    fprintf(fp, "%c%c\n", col, row);
+    if (num) {
+      Position pos = puttable[rand()%num];
+      char col = posToXY(pos).first + 'a';
+      char row = posToXY(pos).second + '1';
+      cout << col << row << endl;
+      fprintf(fp, "%c%c\n", col, row);
+    }
   }
   fprintf(fp, "--game set--\n");
   fclose(fp);
