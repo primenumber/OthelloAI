@@ -47,7 +47,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
       for(; itr != pos_list.end(); ++itr) {
         auto child = std::unique_ptr<GameTree>();
         children_.emplace_back(new GameTree(
-            put(board_, *itr, state_), invertState(state_), stones_, *itr,
+            put(board_, *itr, state_), invertState(state_), stones_ + 1, *itr,
             value_func_, win_point_func_));
       }
       sort(children_.begin(), children_.begin() + searched_num,
@@ -58,7 +58,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
   } else {
     auto itr = children_.begin();
     for (;itr != children_.end(); ++itr) {
-      int value = -(*itr)->Search(depth-1, -beta, -alpha, false);
+      int value = -(*itr)->Search(pass_?depth:(depth-1), -beta, -alpha, false);
       alpha = std::max(alpha, value);
       if (alpha >= beta) {
         ++itr;

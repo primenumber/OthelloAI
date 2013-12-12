@@ -26,7 +26,7 @@ class Search {
       : board_(), player_state_(player_state), now_state_(board::State::BLACK),
         optimal_(),
         game_tree_root_(new GameTree(board_, board::State::BLACK, 4,
-            board::nullpos, CalcValue, CalcWinPoint)),
+            board::nullpos, value::CalcValue, CalcWinPoint)),
         depth(4) { Calc(std::chrono::milliseconds(300)); }
   void Put(board::Position);
   void Calc(std::chrono::milliseconds calc_time);
@@ -37,11 +37,6 @@ class Search {
           int alpha, const int beta, const bool pass = false);
   static int CalcWinPoint(const board::Board& board, const board::State state,
                           const int stones);
-  static int CalcValue(const board::Board& board, const board::State state,
-                       const int stones) {
-    value::CalcValue cv;
-    return cv(board, state, stones);
-  }
   board::Board board_;
   board::State player_state_;
   board::State now_state_;
@@ -52,10 +47,11 @@ class Search {
 
 void Search::Put(board::Position position) {
   using board::toStr;
-  if(position != board::nullpos)
+  if(position != board::nullpos) {
     board_ = board::put(board_, position, now_state_);
+    --depth;
+  }
   now_state_ = board::invertState(now_state_);
-  --depth;
   for(int i = 0; i < game_tree_root_->children_.size(); ++i) {
     if(game_tree_root_->children_[i]->position_ == position) {
       GameTree* tmp = game_tree_root_->children_[i].release();
@@ -91,10 +87,10 @@ void Search::Calc(std::chrono::milliseconds calc_time) {
       break;
   }
   fprintf(fp ,"search:calc depth:%d\n", depth);
-  if (player_state_ == now_state_)
+//  if (player_state_ == now_state_)
     optimal_ = game_tree_root_->children_[0]->position_;
-  else
-    optimal_ = game_tree_root_->children_[0]->children_[0]->position_;
+//  else
+//    optimal_ = game_tree_root_->children_[0]->children_[0]->position_;
 }
 
 } // namespace ai
@@ -135,7 +131,7 @@ int main() {
 //  othello::board::Board::InitPuttableTable();
   srand(getpid());
   char buf[81];
-  sprintf(buf, "ai01_log_%d.log", getpid());
+  sprintf(buf, "log/ai01_log_%d.log", getpid());
   fp = fopen(buf, "w");
   std::string player;
   cin >> player;
@@ -174,20 +170,25 @@ int main() {
       cout << "f5" << endl;
       fprintf(fp, "f5\n");
       search.Put(xyToPos(5, 4));
-    } else if(!getPuttable(toBoard(board_str), state).empty()) {
-      std::vector<Position> pos_list = getPuttable(toBoard(board_str), state);
-      Position enemy_put = GetPut(board, search.GetBoard());
-      search.Put(enemy_put);
-      search.Calc(duration_cast<milliseconds>(calc_time));
-      pos = search.GetOptimalPosition();
-      cout << toStr(pos) << endl;
-      fprintf(fp, "%s\n", toStr(pos).c_str());
-      search.Put(pos);
     } else {
+      std::vector<Position> pos_list = getPuttable(board, state);
       Position enemy_put = GetPut(board, search.GetBoard());
+      if (enemy_put == othello::board::nullpos) {
+        fprintf(fp, "enemy: pass\n");
+      } else {
+        fprintf(fp, "enemy: %s\n", toStr(enemy_put).c_str());
+      }
       search.Put(enemy_put);
-      search.Put(othello::board::nullpos);
       search.Calc(duration_cast<milliseconds>(calc_time));
+      if (!pos_list.empty()) {
+        pos = search.GetOptimalPosition();
+        cout << toStr(pos) << endl;
+        fprintf(fp, "%s\n", toStr(pos).c_str());
+        search.Put(pos);
+      } else {
+        search.Put(othello::board::nullpos);
+        fprintf(fp, "pass\n");
+      }
     }
 //    search.Calc(milliseconds(1000));
   }

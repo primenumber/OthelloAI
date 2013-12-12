@@ -2,6 +2,19 @@
 namespace othello {
 namespace value {
 
+int calc_table(const board::Board&, const board::State);
+int calc_edge(const board::Board&, const board::State, const int);
+int calc_puttable(const board::Board&, board::State);
+
+int CalcValue(const board::Board& board, const board::State state,
+                const int stones) {
+  int value = 0;
+  value += calc_table(board, state);
+  value += calc_edge(board, state, stones);
+  value += calc_puttable(board, state);
+  return value;
+}
+
 constexpr std::array<int, board::kboard_table_size> value_table_ = 
     std::array<int, board::kboard_table_size>{{
        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -16,7 +29,7 @@ constexpr std::array<int, board::kboard_table_size> value_table_ =
        0,   0,   0,   0,   0,   0,   0,   0,   0,   0
     }};
 
-int CalcValue::calc_table(const board::Board& board, board::State state) {
+int calc_table(const board::Board& board, board::State state) {
   using board::xyToPos;
   int value = 0;
   for (int i = 0; i < 8; ++i) {
@@ -52,7 +65,7 @@ std::array<int, 2> stone_num_line(const board::Board& board,
   return stone_num;
 }
 
-int CalcValue::calc_edge(const board::Board& board, const board::State state,
+int calc_edge(const board::Board& board, const board::State state,
                          const int stones) {
   using board::xyToPos;
   using board::State;
@@ -123,7 +136,7 @@ int CalcValue::calc_edge(const board::Board& board, const board::State state,
 
 constexpr int value_puttable = 3;
 
-int CalcValue::calc_puttable(const board::Board& board,
+int calc_puttable(const board::Board& board,
                              const board::State state) {
   return getPuttable(board, state).size() * value_puttable;
 }

@@ -130,6 +130,9 @@ std::string toStr(const Board&);
 std::string toStr_EasyToRead(const Board&);
 Board toBoard(const std::string&);
 std::pair<int, int> countBoard(const Board&);
+Position rotatePos(const int, const int, const int);
+Board rotateBoard(const Board&, const int);
+Board reverceBoard(const Board&);
 std::string toStr(const State);
 std::string toStr(const Position);
 

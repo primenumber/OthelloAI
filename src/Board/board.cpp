@@ -145,7 +145,7 @@ uint64_t Board::ToRowUint64(const uint64_t data) const {
   }
 }
 */
-bool isPuttable(const Board & board, const Position pos,
+bool isPuttable(const Board& board, const Position pos,
                 const State state) {
   if (board[pos] != State::NONE)
     return false;
@@ -170,7 +170,7 @@ bool isPuttable(const Board & board, const Position pos,
   }
 }
 
-std::vector<Position> getPuttable(const Board & board, State state) {
+std::vector<Position> getPuttable(const Board& board, State state) {
   std::vector<Position> ans;
   ans.reserve(16);
   for (int i = 0; i < 8; ++i) {
@@ -183,8 +183,8 @@ std::vector<Position> getPuttable(const Board & board, State state) {
   return ans;
 }
 
-std::vector<Position> getPuttable(const Board & board, State state, 
-															    const std::vector<Position> & nonevec) {
+std::vector<Position> getPuttable(const Board& board, State state, 
+															    const std::vector<Position>& nonevec) {
   std::vector<Position> ans;
   ans.reserve(nonevec.size());
   for (auto pos : nonevec)
@@ -193,7 +193,7 @@ std::vector<Position> getPuttable(const Board & board, State state,
   return ans;
 }
 
-Board put(const Board & board, Position pos, State state) {
+Board put(const Board& board, Position pos, State state) {
   Board ans(board);
   ans[pos] = state;
   for (auto d : dir) {
@@ -220,7 +220,7 @@ Board put(const Board & board, Position pos, State state) {
   return ans;
 }
 
-std::vector<Position> getUnput(const Board & board) {
+std::vector<Position> getUnput(const Board& board) {
   std::vector<Position> ans;
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < 8; ++j) {
@@ -232,7 +232,7 @@ std::vector<Position> getUnput(const Board & board) {
   return ans;
 }
 
-std::string toStr(const Board & board) {
+std::string toStr(const Board& board) {
   std::stringstream ss;
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < 8; ++j) {
@@ -255,7 +255,7 @@ std::string toStr(const Board & board) {
   return ss.str();
 }
 
-std::string toStr_EasyToRead(const Board & board) {
+std::string toStr_EasyToRead(const Board& board) {
   std::stringstream ss;
   ss << " |a b c d e f g h\n";
   ss << "-+---------------\n";
@@ -283,7 +283,7 @@ std::string toStr_EasyToRead(const Board & board) {
   return ss.str();
 }
 
-Board toBoard(const std::string & str) {
+Board toBoard(const std::string& str) {
   std::stringstream ss;
   ss << str;
   char buf[9];
@@ -307,7 +307,7 @@ Board toBoard(const std::string & str) {
   return bd;
 }
 
-std::pair<int,int> countBoard(const Board & board) {
+std::pair<int,int> countBoard(const Board& board) {
   int b = 0;
   int w = 0;
   for (int i = 0; i < 8; ++i) {
@@ -324,6 +324,40 @@ std::pair<int,int> countBoard(const Board & board) {
     }
   }
   return std::make_pair(b, w);
+}
+
+Position rotatePos(const int x, const int y, int times) {
+  times %= 4;
+  switch (times) {
+   case 0:
+    return xyToPos(x, y);
+    break;
+   case 1:
+    return xyToPos(7-y, x);
+    break;
+   case 2:
+    return xyToPos(7-x, 7-y);
+    break;
+   case 3:
+    return xyToPos(y, 7-x);
+    break;
+  }
+}
+
+Board rotateBoard(const Board& board, int times) {
+  Board rotate;
+  for (int i = 0; i < 8; ++i)
+    for (int j = 0; j < 8; ++j)
+      rotate[rotatePos(i, j, times)] = board[xyToPos(i, j)];
+  return rotate;
+}
+
+Board reverseBoard(const Board& board) {
+  Board reverse;
+  for (int i = 0; i < 8; ++i)
+    for (int j = 0; j < 8; ++j)
+      reverse[xyToPos(7-i, j)] = board[xyToPos(i, j)];
+  return reverse;
 }
 
 std::string toStr(const State state) {

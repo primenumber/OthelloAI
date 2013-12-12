@@ -16,6 +16,12 @@ server.o: GameServer/server.cpp GameServer/othelloAI.cpp
 	$(CPPC) $(CPPFLAGS2) -o server.o -c GameServer/server.cpp
 gametimer.o: GameServer/gametimer.cpp
 	$(CPPC) $(CPPFLAGS2) -o gametimer.o -c GameServer/gametimer.cpp
+TestGameState:
+	make -C Board all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv Board/*.o .
+	make -C Test all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv Test/*.o .
+	$(CPPC) $(CPPFLAGS2) -o TestGameState Test.o GameState.o basic_GameState.o LineState.o Position.o State.o $(LIBS)
 othelloAI.o: GameServer/othelloAI.cpp
 	$(CPPC) $(CPPFLAGS2) -o othelloAI.o -c GameServer/othelloAI.cpp
 ogs: board.o server.o gametimer.o othelloAI.o

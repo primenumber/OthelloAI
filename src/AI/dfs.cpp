@@ -20,6 +20,7 @@ int dfs(const board::Board& board, const board::State state,
   using othello::board::getPuttable;
   using othello::board::invertState;
   using othello::board::State;
+  using othello::value::CalcValue;
   if (depth > 0) {
     std::vector<Position> pos_list = getPuttable(board, state);
     if (pos_list.empty()) {
@@ -39,8 +40,7 @@ int dfs(const board::Board& board, const board::State state,
     }
     return alpha;
   } else {
-    value::CalcValue cv;
-    return cv(board, state, stones);
+    return CalcValue(board, state, stones);
   }
 }
 

@@ -20,7 +20,7 @@ int main() {
   using std::endl;
   srand(getpid());
   char buf[81];
-  sprintf(buf, "rndo_log_%d.log", getpid());
+  sprintf(buf, "log/rndo_log_%d.log", getpid());
   FILE* fp = fopen(buf, "w");
   std::string player;
   cin >> player;
@@ -54,6 +54,8 @@ int main() {
       char row = posToXY(pos).second + '1';
       cout << col << row << endl;
       fprintf(fp, "%c%c\n", col, row);
+    } else {
+      fprintf(fp, "pass\n");
     }
   }
   fprintf(fp, "--game set--\n");

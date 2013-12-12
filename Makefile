@@ -5,6 +5,9 @@ all:primeOthello ogs rndo
 primeOthello :
 	make -C src primeOthello CPPC=$(CPPC) CPPFLAGS=$(CPPFLAGS)
 	mv src/primeOthello .
+TestGameState :
+	make -C src TestGameState CPPC=$(CPPC) CPPFLAGS=$(CPPFLAGS)
+	mv src/TestGameState .
 ogs :
 	make -C src ogs CPPC=$(CPPC) CPPFLAGS=$(CPPFLAGS)
 	mv src/ogs .
@@ -16,4 +19,5 @@ clean :
 	-@rm primeOthello
 	-@rm ogs
 	-@rm rndo
+	-@rm TestGameState
 
