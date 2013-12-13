@@ -44,7 +44,7 @@ class LineState {
   LineState(const uint8_t black_state, const uint8_t white_state)
       : black_state_(black_state), white_state_(white_state) {}
   // base3 => LineState (NONE:0 BLACK:1 WHITE:2)
-  LineState(int base3): black_state_(), white_state_();
+  LineState(int base3);
   State operator[](const int index) const;
   bool isPuttable(const int index, const State state, const int line_length) const;
   uint8_t GetPuttable(const State state, const int line_length) const;
@@ -89,7 +89,7 @@ class basic_GameState {
   basic_GameState& SetRow(const int index, const LineState line_state);
   basic_GameState& SetColumn(const int index, const LineState line_state);
   basic_GameState& SetCross(const int index, const Direction direction,
-                					 const LineState line_state);
+                					  const LineState line_state);
   bool isPuttable(const Position position, const State state) const;
   uint64_t GetPuttable(const State state) const;
 //  std::vector<Position> GetPuttablePosition(State state) const;
@@ -99,10 +99,23 @@ class basic_GameState {
  private:
   uint64_t black_state_;
   uint64_t white_state_;
-  LineState PutOrIdWhite(const std::pair<int, int> xy_pair) const;
-  LineState PutOrIdBlack(const std::pair<int, int> xy_pair) const;
-  LineState PutOrIdCross(const LineState line, const int index,
-      const line_length, const std::pair<int, int> xy_pair) const;
+  LineState PutOrIdWhite(const std::pair<int, int> xy_pair,
+                         const State state);
+  LineState PutOrIdBlack(const std::pair<int, int> xy_pair,
+                         const State state);
+  LineState PutOrIdCross(LineState line, const int index,
+      const int line_length, const std::pair<int, int> xy_pair,
+      const State state);
+  uint64_t GetBitMask(const Position position) const;
+  uint64_t GetPutBits(const uint8_t row, const uint8_t column,
+    const uint8_t cross_white, const uint8_t cross_black,
+    const std::pair<int, int> xy_pair) const;
+  uint8_t Column2Uint8(uint64_t data) const;
+  uint8_t CrossWhite2Uint8(uint64_t data) const;
+  uint8_t CrossBlack2Uint8(uint64_t data) const;
+  uint64_t Uint82Column(const uint8_t data) const;
+  uint64_t Uint82CrossWhite(const uint8_t data) const;
+  uint64_t Uint82CrossBlack(const uint8_t data) const;
 };
 
 class GameState : private basic_GameState {
@@ -118,7 +131,7 @@ class GameState : private basic_GameState {
   GameState& operator=(const GameState& lhs) = default;
   GameState& operator=(GameState&& lhs) = default;
   State GetState() const { return state_; }
-  bool isPuttable(const Position position) {
+  bool isPuttable(const Position position) const {
     return basic_GameState::isPuttable(position, state_);
   }
   uint64_t GetPuttable() const { return basic_GameState::GetPuttable(state_); }

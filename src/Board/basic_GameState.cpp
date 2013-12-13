@@ -16,7 +16,7 @@ State basic_GameState::atPosition(const Position position) const {
     return State::NONE;
 }
 
-uint8_t Column2Uint8(uint64_t data) {
+uint8_t basic_GameState::Column2Uint8(uint64_t data) const {
   data = (data & UINT64_C(0x0001000100010001)) |
         ((data & UINT64_C(0x0100010001000100)) >> 7);
   data = (data & UINT64_C(0x0000000300000003)) |
@@ -26,7 +26,7 @@ uint8_t Column2Uint8(uint64_t data) {
   return static_cast<uint8_t>(data);
 }
 
-uint8_t CrossWhite2Uint8(uint64_t data) {
+uint8_t basic_GameState::CrossWhite2Uint8(uint64_t data) const {
   data = (data & UINT64_C(0x0040001000040001)) |
         ((data & UINT64_C(0x8000200008000200)) >> 8);
   data = (data & UINT64_C(0x0000003000000003)) |
@@ -36,7 +36,7 @@ uint8_t CrossWhite2Uint8(uint64_t data) {
   return static_cast<uint8_t>(data);
 }
 
-uint8_t CrossBlack2Uint8(uint64_t data) {
+uint8_t basic_GameState::CrossBlack2Uint8(uint64_t data) const {
   data = ((data & UINT64_C(0x0002000800200080)) >> 1) |
          ((data & UINT64_C(0x0100040010004000)) >> 7);
   data = ((data & UINT64_C(0x0000000C000000C0)) >> 2) |
@@ -83,7 +83,7 @@ LineState basic_GameState::GetCross(const int index,
   }
 }
 
-uint64_t Uint82Column(const uint8_t data) {
+uint64_t basic_GameState::Uint82Column(const uint8_t data) const {
   uint64_t result = static_cast<uint64_t>(data);
   result = (result & UINT64_C(0x000000000000000F)) |
           ((result & UINT64_C(0x00000000000000F0)) << 28);
@@ -94,7 +94,7 @@ uint64_t Uint82Column(const uint8_t data) {
   return result;
 }
 
-uint64_t Uint82CrossWhite(const uint8_t data) {
+uint64_t basic_GameState::Uint82CrossWhite(const uint8_t data) const {
   uint64_t result = static_cast<uint64_t>(data);
   result = (result & UINT64_C(0x000000000000000F)) |
           ((result & UINT64_C(0x00000000000000F0)) << 32);
@@ -105,7 +105,7 @@ uint64_t Uint82CrossWhite(const uint8_t data) {
   return result;
 }
 
-uint64_t Uint82CrossBlack(const uint8_t data) {
+uint64_t basic_GameState::Uint82CrossBlack(const uint8_t data) const {
   uint64_t result = static_cast<uint64_t>(data);
   result = ((result & UINT64_C(0x000000000000000F)) << 4) |
            ((result & UINT64_C(0x00000000000000F0)) << 28);
@@ -185,19 +185,6 @@ bool basic_GameState::isPuttable(const Position position,
   return false;
 }
 
-std::string binstr(uint64_t data) {
-  std::string str = "";
-  for (int i = 0; i < 64; ++i) {
-    if (i && (i % 8) == 0)
-      str += '\n';
-    if (data & (UINT64_C(1) << i))
-      str += '1';
-    else
-      str += '0';
-  }
-  return str;
-}
-
 uint64_t basic_GameState::GetPuttable(const State state) const {
   uint64_t data = 0;
   for (Position i = 0; i < 64; ++i)
@@ -214,7 +201,7 @@ uint64_t basic_GameState::GetPuttable(const State state) const {
 // 00101010
 // 01001001
 // 10001000
-uint64_t GetBitMask(const Position position) {
+uint64_t basic_GameState::GetBitMask(const Position position) const {
   std::pair<int, int> xy_pair = Pos2XY(position);
   uint64_t result = 0;
   const int shift_row = xy_pair.second * 8;
@@ -231,9 +218,9 @@ uint64_t GetBitMask(const Position position) {
   return result;
 }
 
-uint64_t GetPutBits(const uint8_t row, const uint8_t column,
+uint64_t basic_GameState::GetPutBits(const uint8_t row, const uint8_t column,
     const uint8_t cross_white, const uint8_t cross_black,
-    const std::pair<int, int> xy_pair) {
+    const std::pair<int, int> xy_pair) const {
   uint64_t result = 0;
   const int shift_row = xy_pair.second * 8;
   result |= static_cast<uint64_t>(row) << shift_row;
@@ -253,8 +240,9 @@ uint64_t GetPutBits(const uint8_t row, const uint8_t column,
   return result;
 }
 
-LineState basic_GameState::PutOrIdCross(const LineState line, const int index,
-    const line_length, const std::pair<int, int> xy_pair) const {
+LineState basic_GameState::PutOrIdCross(LineState line, const int index,
+    const int line_length, const std::pair<int, int> xy_pair,
+    const State state) {
   if (line.isPuttable(xy_pair.second - std::max(-index, 0), state, line_length))
     line.Put(xy_pair.second - std::max(-index, 0), state, line_length);
   return line;
@@ -265,7 +253,7 @@ LineState basic_GameState::PutOrIdWhite(const std::pair<int, int> xy_pair,
   const int index = xy_pair.first-xy_pair.second;
   const int line_length = 8 - abs(index);
   LineState cross_white = GetCross(index, Direction::WHITE_LINE);
-  return PutOrIdCross(cross_white, index, line_length, xy_pair);
+  return PutOrIdCross(cross_white, index, line_length, xy_pair, state);
 }
 
 LineState basic_GameState::PutOrIdBlack(const std::pair<int, int> xy_pair,
@@ -273,7 +261,7 @@ LineState basic_GameState::PutOrIdBlack(const std::pair<int, int> xy_pair,
   const int index = (7-xy_pair.first)-xy_pair.second;
   const int line_length = 8 - abs(index);
   LineState cross_black = GetCross(index, Direction::BLACK_LINE);
-  return PutOrIdCross(cross_white, index, xy_pair);
+  return PutOrIdCross(cross_black, index, line_length, xy_pair, state);
 }
 
 basic_GameState& basic_GameState::Put(const Position position, const State state) {
