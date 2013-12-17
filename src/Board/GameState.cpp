@@ -34,7 +34,7 @@ std::vector<GameState> GameState::NextGameStates() const {
 }
 
 int GameState::NegaMax(const int depth,
-    const std::function<int (const GameState&)> value_func) const {
+    const std::function<int (const GameState&)>& value_func) const {
   if (depth == 0) {
     return value_func(*this);
   } else {
@@ -53,7 +53,7 @@ int GameState::NegaMax(const int depth,
 }
 
 int GameState::AlphaBeta(const int depth,
-    const std::function<int (const GameState&)> value_func,
+    const std::function<int (const GameState&)>& value_func,
     int alpha, const int beta) const {
   if (depth == 0) {
     return value_func(*this);
@@ -73,8 +73,8 @@ int GameState::AlphaBeta(const int depth,
   }
 }
 
-boost::optional<Position> GameState::OptimalPut(const int depth,
-    const std::function<int (const GameState&)> value_func) const {
+boost::optional<Position> GameState::GetOptimalPut(const int depth,
+    const std::function<int (const GameState&)>& value_func) const {
   std::vector<GameState> next = NextGameStates();
   boost::optional<Position> position;
   int value_max = -kValueMax;

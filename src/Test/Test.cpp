@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <ctime>
 #include <array>
 #include <iostream>
 #include <boost/optional.hpp>
@@ -14,32 +16,71 @@ constexpr std::array<int, 64> table = {
   100,-50, 15, 15, 15, 15,-50,100
 };
 
+std::array<std::array<std::array<int, 8>, 256>, 256> value_table;
+
+void InitValueTable() {
+  using othello::gamestate::State;
+  using othello::gamestate::Pow3;
+  using othello::gamestate::Base3ToUint8Pair;
+  using othello::gamestate::LineState;
+  for (int i = 0; i < Pow3(8); ++i) {
+    auto state_pair = Base3ToUint8Pair(i);
+    LineState line_state(i);
+    for (int j = 0; j < 8; ++j) {
+      int value = 0;
+      for (int k = 0; k < 8; ++k) {
+        if (line_state[k] == State::BLACK)
+          value += table[j * 8 + k];
+        else if (line_state[k] == State::WHITE)
+          value -= table[j * 8 + k];
+      }
+      value_table[state_pair.first][state_pair.second][j] = value;
+    }
+  }
+}
+
 int func(const othello::gamestate::GameState& game_state) {
+  using othello::gamestate::State;
   int value = 0;
-  for (int i = 0; i < 64; ++i) {
-    if (game_state.atPosition(i) == game_state.GetState()) {
-      value += table[i];
-    } else if (game_state.atPosition(i) == InvertState(game_state.GetState())) {
-      value -= table[i];
+  if (game_state.GetState() == State::BLACK) {
+    for (int i = 0; i < 8; ++i) {
+      value += value_table
+          [(game_state.GetBlack() >> (i * 8)) & 0xFF]
+          [(game_state.GetWhite() >> (i * 8)) & 0xFF]
+          [i];
+    }
+  } else {
+    for (int i = 0; i < 8; ++i) {
+      value -= value_table
+          [(game_state.GetBlack() >> (i * 8)) & 0xFF]
+          [(game_state.GetWhite() >> (i * 8)) & 0xFF]
+          [i];
     }
   }
   return value;
 }
 
 int main() {
-  using othello::gamestate::GameState;
+  using othello::gamestate::LineState;
+  using othello::gamestate::GameTree;
   using othello::gamestate::Position;
-  GameState game_state;
+  LineState::Init();
+  InitValueTable();
+  std::unique_ptr<GameTree> game_tree(new GameTree());
+  int tree_depth, search_depth;
+  std::cin >> tree_depth >> search_depth;
   bool pass = false;
   while (true) {
     std::cout << "Now State" << std::endl;
-    std::cout << game_state.ToString() << std::endl;
-    boost::optional<Position> opt_position = game_state.OptimalPut(7, func);
+    std::cout << game_tree->ToString() << std::endl;
+    game_tree->SearchTree(tree_depth, search_depth, func);
+    GameTree& optimal_child = *(game_tree->GetChildren().front());
+    boost::optional<Position> opt_position = optimal_child.GetRecentPut();
     if (opt_position) {
-      game_state.Put(*opt_position);
+      game_tree.reset(game_tree->Put(*opt_position).release());
       pass = false;
     } else if (!pass) {
-      game_state.Pass();
+      game_tree.reset(game_tree->Pass().release());
       pass = true;
     } else
       break;
