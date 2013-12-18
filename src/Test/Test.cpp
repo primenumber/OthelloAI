@@ -7,12 +7,12 @@
 
 constexpr std::array<int, 64> table = {
   100,-50, 15, 15, 15, 15,-50,100,
-  -50,-70,-20,-20,-20,-20,-70,-50,
-   15,-20,  0, -5, -5,  0,-20, 15,
-   15,-20, -5, -5, -5, -5,-20, 15,
-   15,-20, -5, -5, -5, -5,-20, 15,
-   15,-20,  0, -5, -5,  0,-20, 15,
-  -50,-70,-20,-20,-20,-20,-70,-50,
+  -50,-70,-10,-10,-10,-10,-70,-50,
+   15,-10,  0, -5, -5,  0,-10, 15,
+   15,-10, -5, -5, -5, -5,-10, 15,
+   15,-10, -5, -5, -5, -5,-10, 15,
+   15,-10,  0, -5, -5,  0,-10, 15,
+  -50,-70,-10,-10,-10,-10,-70,-50,
   100,-50, 15, 15, 15, 15,-50,100
 };
 
@@ -72,7 +72,7 @@ int main() {
   bool pass = false;
   while (true) {
     std::cout << "Now State" << std::endl;
-    std::cout << game_tree->ToString() << std::endl;
+    std::cout << game_tree->ToString(game_tree->GetState()) << std::endl;
     game_tree->SearchTree(tree_depth, search_depth, func);
     GameTree& optimal_child = *(game_tree->GetChildren().front());
     boost::optional<Position> opt_position = optimal_child.GetRecentPut();

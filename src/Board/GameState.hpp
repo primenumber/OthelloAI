@@ -117,6 +117,7 @@ class basic_GameState {
   uint64_t GetWhite() const { return white_state_; }
   basic_GameState& Put(const Position position, const State state);
   std::string ToString() const;
+  std::string ToString(const State state) const;
  private:
   uint64_t black_state_;
   uint64_t white_state_;
@@ -140,11 +141,16 @@ class basic_GameState {
   static uint64_t Uint82Column(const uint8_t data);
   static uint64_t Uint82CrossWhite(const uint8_t data);
   static uint64_t Uint82CrossBlack(const uint8_t data);
-  static uint64_t TransposeBits(const uint64_t data);
-  static uint64_t DistortBitsWhite(const uint64_t data);
-  static uint64_t DistortBitsBlack(const uint64_t data);
-  static uint64_t UndistortBitsWhite(const uint64_t data);
-  static uint64_t UndistortBitsBlack(const uint64_t data);
+  static uint64_t TransposeBits(uint64_t data);
+  static uint64_t FlipHorizonalBits(uint64_t data);
+  static uint64_t DistortBitsWhite1(const uint64_t data);
+  static uint64_t DistortBitsWhite2(const uint64_t data);
+  static uint64_t DistortBitsBlack1(const uint64_t data);
+  static uint64_t DistortBitsBlack2(const uint64_t data);
+  static uint64_t UndistortBitsWhite1(const uint64_t data);
+  static uint64_t UndistortBitsWhite2(const uint64_t data);
+  static uint64_t UndistortBitsBlack1(const uint64_t data);
+  static uint64_t UndistortBitsBlack2(const uint64_t data);
   static uint64_t LinePuttableBits(const uint64_t black_state,
       const uint64_t white_state, const int index, const int line_length,
       const State state);
@@ -199,6 +205,7 @@ class GameTree : private GameState {
   using GameState::ToString;
   using GameState::operator[];
   using GameState::atPosition;
+  using GameState::GetState;
   using GameState::GetRecentPut;
   GameTree() = default;
   GameTree(const GameState& that) : GameState(that) {};
