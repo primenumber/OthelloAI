@@ -19,6 +19,8 @@ enum class State {
 };
 
 State InvertState(const State state);
+bool IsBlack(const State state);
+bool IsWhite(const State state);
 
 // White Line  Black Line
 //  \.......    ......./
@@ -40,6 +42,7 @@ typedef int Position;
 std::pair<int, int> Pos2XY(const Position position);
 int Pos2X(const Position position);
 int Pos2Y(const Position position);
+std::string ToString(const boost::optional<Position>& opt_position);
 
 constexpr int Pow3(const int index) {
   return index ? Pow3(index - 1) * 3 : 1;
@@ -115,6 +118,11 @@ class basic_GameState {
 //  std::vector<GameState> GetPuttableGameState(State state) const;
   uint64_t GetBlack() const { return black_state_; }
   uint64_t GetWhite() const { return white_state_; }
+  int CountBlack() const;
+  int CountWhite() const;
+  std::pair<int, int> CountStones() const {
+    return make_pair(CountBlack(), CountWhite());
+  }
   basic_GameState& Put(const Position position, const State state);
   std::string ToString() const;
   std::string ToString(const State state) const;
@@ -129,40 +137,35 @@ class basic_GameState {
   LineState PutOrIdCross(LineState line, const int index,
       const int line_length, const std::pair<int, int> xy_pair,
       const State state);
-  static uint8_t MaskShiftRow8(const uint64_t data, const int index);
-  static uint64_t MaskShiftRow64(const uint64_t data, const int index);
-  static uint64_t GetBitMask(const Position position);
-  static uint64_t GetPutBits(const uint8_t row, const uint8_t column,
-    const uint8_t cross_white, const uint8_t cross_black,
-    const std::pair<int, int> xy_pair);
-  static uint8_t Column2Uint8(uint64_t data);
-  static uint8_t CrossWhite2Uint8(uint64_t data);
-  static uint8_t CrossBlack2Uint8(uint64_t data);
-  static uint64_t Uint82Column(const uint8_t data);
-  static uint64_t Uint82CrossWhite(const uint8_t data);
-  static uint64_t Uint82CrossBlack(const uint8_t data);
-  static uint64_t TransposeBits(uint64_t data);
-  static uint64_t FlipHorizonalBits(uint64_t data);
-  static uint64_t DistortBitsWhite1(const uint64_t data);
-  static uint64_t DistortBitsWhite2(const uint64_t data);
-  static uint64_t DistortBitsBlack1(const uint64_t data);
-  static uint64_t DistortBitsBlack2(const uint64_t data);
-  static uint64_t UndistortBitsWhite1(const uint64_t data);
-  static uint64_t UndistortBitsWhite2(const uint64_t data);
-  static uint64_t UndistortBitsBlack1(const uint64_t data);
-  static uint64_t UndistortBitsBlack2(const uint64_t data);
-  static uint64_t LinePuttableBits(const uint64_t black_state,
-      const uint64_t white_state, const int index, const int line_length,
-      const State state);
+//  static uint8_t MaskShiftRow8(const uint64_t data, const int index);
+//  static uint64_t MaskShiftRow64(const uint64_t data, const int index);
+//  static uint64_t GetBitMask(const Position position);
+//  static uint64_t GetPutBits(const uint8_t row, const uint8_t column,
+//    const uint8_t cross_white, const uint8_t cross_black,
+//    const std::pair<int, int> xy_pair);
+//  static uint8_t Column2Uint8(uint64_t data);
+//  static uint8_t CrossWhite2Uint8(uint64_t data);
+//  static uint8_t CrossBlack2Uint8(uint64_t data);
+//  static uint64_t Uint82Column(const uint8_t data);
+//  static uint64_t Uint82CrossWhite(const uint8_t data);
+//  static uint64_t Uint82CrossBlack(const uint8_t data);
+//  static uint64_t TransposeBits(uint64_t data);
+//  static uint64_t FlipHorizonalBits(uint64_t data);
+//  static uint64_t DistortBitsWhite1(uint64_t data);
+//  static uint64_t DistortBitsWhite2(uint64_t data);
+//  static uint64_t DistortBitsBlack1(uint64_t data);
+//  static uint64_t DistortBitsBlack2(uint64_t data);
+//  static uint64_t UndistortBitsWhite1(uint64_t data);
+//  static uint64_t UndistortBitsWhite2(uint64_t data);
+//  static uint64_t UndistortBitsBlack1(uint64_t data);
+//  static uint64_t UndistortBitsBlack2(uint64_t data);
+//  static uint64_t LinePuttableBits(const uint64_t black_state,
+//      const uint64_t white_state, const int index, const int line_length,
+//      const State state);
 };
 
-class GameState : private basic_GameState {
+class GameState : public basic_GameState {
  public:
-  using basic_GameState::GetBlack;
-  using basic_GameState::GetWhite;
-  using basic_GameState::ToString;
-  using basic_GameState::operator[];
-  using basic_GameState::atPosition;
   constexpr static int kValueMax = 1000000;
   GameState() : basic_GameState(), state_(State::BLACK), recent_position_() {};
   GameState(const uint64_t black_state, const uint64_t white_state, State state,

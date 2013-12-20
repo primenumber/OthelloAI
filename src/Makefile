@@ -26,6 +26,12 @@ othelloAI.o: GameServer/othelloAI.cpp
 	$(CPPC) $(CPPFLAGS2) -o othelloAI.o -c GameServer/othelloAI.cpp
 ogs: board.o server.o gametimer.o othelloAI.o
 	$(CPPC) $(CPPFLAGS2) -o ogs server.o gametimer.o othelloAI.o board.o $(LIBS)
+ogs2:
+	make -C Board all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv Board/*.o .
+	make -C GameServer2 all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv GameServer2/*.o .
+	$(CPPC) $(CPPFLAGS2) -o ogs Server.o GameTimer.o OthelloAI.o GameState.o $(LIBS)
 rndo: GameServer/random.cpp board.o
 	$(CPPC) $(CPPFLAGS2) -o rndo board.o GameServer/random.cpp $(LIBS)
 clean:

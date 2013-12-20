@@ -18,32 +18,32 @@ State basic_GameState::atPosition(const Position position) const {
 }
 
 uint8_t basic_GameState::Column2Uint8(uint64_t data) {
-  data = (data & UINT64_C(0x0001000100010001)) |
-        ((data & UINT64_C(0x0100010001000100)) >> 7);
-  data = (data & UINT64_C(0x0000000300000003)) |
-        ((data & UINT64_C(0x0003000000030000)) >> 14);
-  data = (data & UINT64_C(0x000000000000000F)) |
-        ((data & UINT64_C(0x0000000F00000000)) >> 28);
+  data = (data & UINT64_C(0x0001000100010001))
+      | ((data & UINT64_C(0x0100010001000100)) >> 7);
+  data = (data & UINT64_C(0x0000000300000003))
+      | ((data & UINT64_C(0x0003000000030000)) >> 14);
+  data = (data & UINT64_C(0x000000000000000F))
+      | ((data & UINT64_C(0x0000000F00000000)) >> 28);
   return static_cast<uint8_t>(data);
 }
 
 uint8_t basic_GameState::CrossWhite2Uint8(uint64_t data) {
-  data = (data & UINT64_C(0x0040001000040001)) |
-        ((data & UINT64_C(0x8000200008000200)) >> 8);
-  data = (data & UINT64_C(0x0000003000000003)) |
-        ((data & UINT64_C(0x00C00000000C0000)) >> 16);
-  data = (data & UINT64_C(0x000000000000000F)) |
-        ((data & UINT64_C(0x000000F000000000)) >> 32);
+  data = (data & UINT64_C(0x0040001000040001))
+      | ((data & UINT64_C(0x8000200008000200)) >> 8);
+  data = (data & UINT64_C(0x0000003000000003))
+      | ((data & UINT64_C(0x00C00000000C0000)) >> 16);
+  data = (data & UINT64_C(0x000000000000000F))
+      | ((data & UINT64_C(0x000000F000000000)) >> 32);
   return static_cast<uint8_t>(data);
 }
 
 uint8_t basic_GameState::CrossBlack2Uint8(uint64_t data) {
-  data = ((data & UINT64_C(0x0002000800200080)) >> 1) |
-         ((data & UINT64_C(0x0100040010004000)) >> 7);
-  data = ((data & UINT64_C(0x0000000C000000C0)) >> 2) |
-         ((data & UINT64_C(0x0003000000300000)) >> 14);
-  data = ((data & UINT64_C(0x00000000000000F0)) >> 4) |
-         ((data & UINT64_C(0x0000000F00000000)) >> 28);
+  data = ((data & UINT64_C(0x0002000800200080)) >> 1)
+       | ((data & UINT64_C(0x0100040010004000)) >> 7);
+  data = ((data & UINT64_C(0x0000000C000000C0)) >> 2)
+       | ((data & UINT64_C(0x0003000000300000)) >> 14);
+  data = ((data & UINT64_C(0x00000000000000F0)) >> 4)
+       | ((data & UINT64_C(0x0000000F00000000)) >> 28);
   return static_cast<uint8_t>(data);
 }
 
@@ -86,34 +86,34 @@ LineState basic_GameState::GetCross(const int index,
 
 uint64_t basic_GameState::Uint82Column(const uint8_t data) {
   uint64_t result = static_cast<uint64_t>(data);
-  result = (result & UINT64_C(0x000000000000000F)) |
-          ((result & UINT64_C(0x00000000000000F0)) << 28);
-  result = (result & UINT64_C(0x0000000300000003)) |
-          ((result & UINT64_C(0x0000000C0000000C)) << 14);
-  result = (result & UINT64_C(0x0001000100010001)) |
-          ((result & UINT64_C(0x0002000200020002)) << 7);
+  result = (result & UINT64_C(0x000000000000000F))
+        | ((result & UINT64_C(0x00000000000000F0)) << 28);
+  result = (result & UINT64_C(0x0000000300000003))
+        | ((result & UINT64_C(0x0000000C0000000C)) << 14);
+  result = (result & UINT64_C(0x0001000100010001))
+        | ((result & UINT64_C(0x0002000200020002)) << 7);
   return result;
 }
 
 uint64_t basic_GameState::Uint82CrossWhite(const uint8_t data) {
   uint64_t result = static_cast<uint64_t>(data);
-  result = (result & UINT64_C(0x000000000000000F)) |
-          ((result & UINT64_C(0x00000000000000F0)) << 32);
-  result = (result & UINT64_C(0x0000003000000003)) |
-          ((result & UINT64_C(0x000000C00000000C)) << 16);
-  result = (result & UINT64_C(0x0040001000040001)) |
-          ((result & UINT64_C(0x0080002000080002)) << 8);
+  result = (result & UINT64_C(0x000000000000000F))
+        | ((result & UINT64_C(0x00000000000000F0)) << 32);
+  result = (result & UINT64_C(0x0000003000000003))
+        | ((result & UINT64_C(0x000000C00000000C)) << 16);
+  result = (result & UINT64_C(0x0040001000040001))
+        | ((result & UINT64_C(0x0080002000080002)) << 8);
   return result;
 }
 
 uint64_t basic_GameState::Uint82CrossBlack(const uint8_t data) {
   uint64_t result = static_cast<uint64_t>(data);
-  result = ((result & UINT64_C(0x000000000000000F)) << 4) |
-           ((result & UINT64_C(0x00000000000000F0)) << 28);
-  result = ((result & UINT64_C(0x0000000300000030)) << 2) |
-           ((result & UINT64_C(0x0000000C000000C0)) << 14);
-  result = ((result & UINT64_C(0x0001000400100040)) << 1) |
-           ((result & UINT64_C(0x0002000800200080)) << 7);
+  result = ((result & UINT64_C(0x000000000000000F)) << 4)
+         | ((result & UINT64_C(0x00000000000000F0)) << 28);
+  result = ((result & UINT64_C(0x0000000300000030)) << 2)
+         | ((result & UINT64_C(0x0000000C000000C0)) << 14);
+  result = ((result & UINT64_C(0x0001000400100040)) << 1)
+         | ((result & UINT64_C(0x0002000800200080)) << 7);
   return result;
 }
 
@@ -226,13 +226,13 @@ uint64_t basic_GameState::GetPuttable(const State state) const {
         crosses_white_data1_white, i, 8-i, state);
     crosses_white2_puttables |= LinePuttableBits(
         crosses_white_data2_black,
-        crosses_white_data2_white, i, 8-i, state);
+        crosses_white_data2_white, i, i+1, state);
     crosses_black1_puttables |= LinePuttableBits(
         crosses_black_data1_black,
         crosses_black_data1_white, i, i+1, state);
     crosses_black2_puttables |= LinePuttableBits(
         crosses_black_data2_black,
-        crosses_black_data2_white, i, i+1, state);
+        crosses_black_data2_white, i, 8-i, state);
   }
   return rows_puttables
       | TransposeBits(columns_puttables)
@@ -240,6 +240,29 @@ uint64_t basic_GameState::GetPuttable(const State state) const {
       | UndistortBitsWhite2(crosses_white2_puttables)
       | UndistortBitsBlack1(crosses_black1_puttables)
       | UndistortBitsBlack2(crosses_black2_puttables);
+}
+
+int GetBlack() const { return CountBits(black_state_); }
+
+int GetWhite() const { return CountBits(white_state_); }
+
+basic_GameState& basic_GameState::Put(const Position position, const State state) {
+  std::pair<int, int> xy_pair = Pos2XY(position);
+  LineState row = GetRow(xy_pair.second);
+  if (row.isPuttable(xy_pair.first, state, 8))
+    row.Put(xy_pair.first, state, 8);
+  LineState column = GetColumn(xy_pair.first);
+  if (column.isPuttable(xy_pair.second, state, 8))
+    column.Put(xy_pair.second, state, 8);
+  LineState cross_white = PutOrIdWhite(xy_pair, state);
+  LineState cross_black = PutOrIdBlack(xy_pair, state);
+  black_state_ &= ~GetBitMask(position);
+  black_state_ |= GetPutBits(row.GetBlack(), column.GetBlack(),
+      cross_white.GetBlack(), cross_black.GetBlack(), xy_pair);
+  white_state_ &= ~GetBitMask(position);
+  white_state_ |= GetPutBits(row.GetWhite(), column.GetWhite(),
+      cross_white.GetWhite(), cross_black.GetWhite(), xy_pair);
+  return *this;
 }
 
 std::string basic_GameState::ToString() const {
@@ -330,25 +353,6 @@ LineState basic_GameState::PutOrIdBlack(const std::pair<int, int> xy_pair,
   return PutOrIdCross(cross_black, index, line_length, xy_pair, state);
 }
 
-basic_GameState& basic_GameState::Put(const Position position, const State state) {
-  std::pair<int, int> xy_pair = Pos2XY(position);
-  LineState row = GetRow(xy_pair.second);
-  if (row.isPuttable(xy_pair.first, state, 8))
-    row.Put(xy_pair.first, state, 8);
-  LineState column = GetColumn(xy_pair.first);
-  if (column.isPuttable(xy_pair.second, state, 8))
-    column.Put(xy_pair.second, state, 8);
-  LineState cross_white = PutOrIdWhite(xy_pair, state);
-  LineState cross_black = PutOrIdBlack(xy_pair, state);
-  black_state_ &= ~GetBitMask(position);
-  black_state_ |= GetPutBits(row.GetBlack(), column.GetBlack(),
-      cross_white.GetBlack(), cross_black.GetBlack(), xy_pair);
-  white_state_ &= ~GetBitMask(position);
-  white_state_ |= GetPutBits(row.GetWhite(), column.GetWhite(),
-      cross_white.GetWhite(), cross_black.GetWhite(), xy_pair);
-  return *this;
-}
-
 // 周囲8方位のビットだけ1になっているビット列を返す
 // 01001001
 // 00101010
@@ -397,6 +401,7 @@ uint64_t basic_GameState::GetPutBits(const uint8_t row, const uint8_t column,
   return result;
 }
 
+// ビット列を転置する
 uint64_t basic_GameState::TransposeBits(uint64_t data) {
   data = (data & UINT64_C(0xAA55AA55AA55AA55))
       | ((data & UINT64_C(0x5500550055005500)) >> 7)
@@ -410,6 +415,7 @@ uint64_t basic_GameState::TransposeBits(uint64_t data) {
   return data;
 }
 
+// ビット列を左右反転する
 uint64_t basic_GameState::FlipHorizonalBits(uint64_t data) {
   data = ((data & UINT64_C(0xAAAAAAAAAAAAAAAA)) >> 1)
        | ((data & UINT64_C(0x5555555555555555)) << 1);
@@ -420,8 +426,8 @@ uint64_t basic_GameState::FlipHorizonalBits(uint64_t data) {
   return data;
 }
 
-// TODO : 分割統治法を使うように変更
-uint64_t basic_GameState::DistortBitsWhite1(const uint64_t data) {
+// TODO : 分割統治法を使うように変更する
+uint64_t basic_GameState::DistortBitsWhite1(uint64_t data) {
   return (data & UINT64_C(0x0101010101010101))
       | ((data & UINT64_C(0x0202020202020200)) >> 8)
       | ((data & UINT64_C(0x0404040404040000)) >> 16)
@@ -433,20 +439,20 @@ uint64_t basic_GameState::DistortBitsWhite1(const uint64_t data) {
 }
 
 // TODO : 高速な実装に書き換える
-uint64_t basic_GameState::DistortBitsWhite2(const uint64_t data) {
+uint64_t basic_GameState::DistortBitsWhite2(uint64_t data) {
   return DistortBitsBlack1(FlipHorizonalBits(data));
 }
 
-uint64_t basic_GameState::DistortBitsBlack1(const uint64_t data) {
+uint64_t basic_GameState::DistortBitsBlack1(uint64_t data) {
   return UndistortBitsWhite1(data);
 }
 
 // TODO : 高速な実装に書き換える
-uint64_t basic_GameState::DistortBitsBlack2(const uint64_t data) {
+uint64_t basic_GameState::DistortBitsBlack2(uint64_t data) {
   return DistortBitsWhite1(FlipHorizonalBits(data));
 }
 
-// TODO : 分割統治法を使うように変更
+// TODO : 分割統治法を使うように変更する
 uint64_t basic_GameState::UndistortBitsWhite1(const uint64_t data) {
   return (data & UINT64_C(0x0101010101010101))
       | ((data & UINT64_C(0x0002020202020202)) << 8)
@@ -458,6 +464,7 @@ uint64_t basic_GameState::UndistortBitsWhite1(const uint64_t data) {
       | ((data & UINT64_C(0x0000000000000080)) << 56);
 }
 
+// TODO : 高速な実装に書き換える
 uint64_t basic_GameState::UndistortBitsWhite2(const uint64_t data) {
   return TransposeBits(UndistortBitsWhite1(data));
 }
@@ -466,6 +473,7 @@ uint64_t basic_GameState::UndistortBitsBlack1(const uint64_t data) {
   return DistortBitsWhite1(data);
 }
 
+// TODO : 高速な実装に書き換える
 uint64_t basic_GameState::UndistortBitsBlack2(const uint64_t data) {
   return FlipHorizonalBits(UndistortBitsWhite1(data));
 }
