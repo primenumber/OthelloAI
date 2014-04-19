@@ -26,7 +26,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
         auto child = std::unique_ptr<GameTree>(new GameTree(board_,
             invertState(state_), stones_, board::nullpos, value_func_,
             win_point_func_));
-        value_ = -child->Search(depth, -beta, -alpha, true);
+        value_ = -child->Search(depth-1, -beta, -alpha, true);
         children_.emplace_back(std::move(child));
       }
     } else {
@@ -58,7 +58,7 @@ int GameTree::Search(const int depth, int alpha, const int beta,
   } else {
     auto itr = children_.begin();
     for (;itr != children_.end(); ++itr) {
-      int value = -(*itr)->Search(pass_?depth:(depth-1), -beta, -alpha, false);
+      int value = -(*itr)->Search(depth-1, -beta, -alpha, false);
       alpha = std::max(alpha, value);
       if (alpha >= beta) {
         ++itr;

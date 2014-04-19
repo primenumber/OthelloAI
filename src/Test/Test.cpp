@@ -4,6 +4,7 @@
 #include <iostream>
 #include <boost/optional.hpp>
 #include "Board/GameState.hpp"
+#include "Lib/BitwiseOperations.hpp"
 
 constexpr std::array<int, 64> table = {
   100,-50, 15, 15, 15, 15,-50,100,
@@ -57,7 +58,19 @@ int func(const othello::gamestate::GameState& game_state) {
           [i];
     }
   }
+  value += othello::bitwise::CountBits(game_state.GetPuttable())*3;
+  value -= othello::bitwise::CountBits(game_state.GetPuttable(
+      othello::gamestate::InvertState(game_state.GetState())))*3;
   return value;
+}
+
+int func_count(const othello::gamestate::GameState& game_state) {
+  using othello::gamestate::State;
+  std::pair<int, int> stones = game_state.CountStones();
+  if (game_state.GetState() == State::BLACK)
+    return (stones.first - stones.second) * 40;
+  else
+    return (stones.second - stones.first) * 40;
 }
 
 int main() {
@@ -66,6 +79,8 @@ int main() {
   using othello::gamestate::Position;
   LineState::Init();
   InitValueTable();
+  othello::bitwise::Init();
+  srand(time(nullptr));
   std::unique_ptr<GameTree> game_tree(new GameTree());
   int tree_depth, search_depth;
   std::cin >> tree_depth >> search_depth;
@@ -73,17 +88,35 @@ int main() {
   while (true) {
     std::cout << "Now State" << std::endl;
     std::cout << game_tree->ToString(game_tree->GetState()) << std::endl;
-    game_tree->SearchTree(tree_depth, search_depth, func);
-    GameTree& optimal_child = *(game_tree->GetChildren().front());
-    boost::optional<Position> opt_position = optimal_child.GetRecentPut();
-    if (opt_position) {
-      game_tree.reset(game_tree->Put(*opt_position).release());
-      pass = false;
-    } else if (!pass) {
-      game_tree.reset(game_tree->Pass().release());
-      pass = true;
-    } else
-      break;
+    auto stones = game_tree->CountStones();
+    if (stones.first + stones.second < 48)
+      game_tree->SearchTree(tree_depth, search_depth, func);
+    else
+      game_tree->SearchTree(tree_depth+6, search_depth, func_count);
+    if (game_tree->GetState() == othello::gamestate::State::BLACK) {
+      GameTree& optimal_child = *(game_tree->GetChildren().front());
+      boost::optional<Position> opt_position = optimal_child.GetRecentPut();
+      if (opt_position) {
+        game_tree.reset(game_tree->Put(*opt_position).release());
+        pass = false;
+      } else if (!pass) {
+        game_tree.reset(game_tree->Pass().release());
+        pass = true;
+      } else
+        break;
+    } else {
+      int child_num = game_tree->GetChildren().size();
+      GameTree& random_child = *(game_tree->GetChildren()[rand()%child_num]);
+      boost::optional<Position> rand_position = random_child.GetRecentPut();
+      if (rand_position) {
+        game_tree.reset(game_tree->Put(*rand_position).release());
+        pass = false;
+      } else if (!pass) {
+        game_tree.reset(game_tree->Pass().release());
+        pass = true;
+      } else
+        break;
+    }
   }
 }
 

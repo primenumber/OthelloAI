@@ -59,7 +59,7 @@ int GameState::AlphaBeta(const int depth,
     return value_func(*this);
   } else {
     std::vector<GameState> next = NextGameStates();
-    if (!recent_position_ && !next.front().recent_position_) {
+    if (IsPassed() && next.front().IsPassed()) {
       return value_func(*this);
     } else {
       for (GameState state : next) {

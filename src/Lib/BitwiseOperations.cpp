@@ -1,5 +1,10 @@
+#include <utility>
 #include "BitwiseOperations.hpp"
 
+namespace othello {
+namespace bitwise {
+
+uint64_t GetBitMaskImpl(const gamestate::Position position);
 std::array<uint64_t, 64> bitmask_table;
 
 void Init() {
@@ -101,12 +106,12 @@ uint64_t MaskShiftRow64(const uint64_t data, const int index) {
 // 00101010
 // 01001001
 // 10001000
-uint64_t GetBitMaskImpl(const Position position) {
+uint64_t GetBitMask(const gamestate::Position position) {
   return bitmask_table[position];
 }
 
-uint64_t GetBitMaskImpl(const Position position) {
-  std::pair<int, int> xy_pair = Pos2XY(position);
+uint64_t GetBitMaskImpl(const gamestate::Position position) {
+  std::pair<int, int> xy_pair = gamestate::Pos2XY(position);
   uint64_t result = 0;
   const int shift_row = xy_pair.second * 8;
   result |= UINT64_C(0x00000000000000FF) << shift_row;
@@ -142,6 +147,15 @@ uint64_t GetPutBits(const uint8_t row, const uint8_t column,
     result |= Uint82CrossBlack(cross_black) << (-cross_black_index * 8);
   }
   return result;
+}
+
+uint64_t LinePuttableBits(const uint64_t black_state,
+    const uint64_t white_state, const int index, const int line_length,
+    const gamestate::State state) {
+  return static_cast<uint64_t>(
+      gamestate::LineState(MaskShiftRow8(black_state, index),
+                           MaskShiftRow8(white_state, index))
+          .GetPuttable(state, line_length)) << (index * 8);
 }
 
 // ビット列を転置する
@@ -210,7 +224,7 @@ uint64_t DistortBitsWhite2(uint64_t data) {
   data = (data & UINT64_C(0x80C0E0F0F0F0F0F0))
       | ((data & UINT64_C(0x00000000080C0E0F)) << 32);
   data = (data & UINT64_C(0x88CCCCCCC0C0C0C0))
-      | ((data & UINT64_C(0x2233303030300000)) << 16);
+      | ((data & UINT64_C(0x0000223330303030)) << 16);
   data = (data & UINT64_C(0xAAAAA8A8A0A08080))
       | ((data & UINT64_C(0x0055545450504040)) << 8);
 // phase 2
@@ -230,25 +244,26 @@ uint64_t DistortBitsBlack1(uint64_t data) {
 
 // TODO : 高速な実装に書き換える
 uint64_t DistortBitsBlack2(uint64_t data) {
-// phase 1
-  data = (data & UINT64_C(0xF0F0F0F0F0E0C080))
-      | ((data & UINT64_C(0x0F0E0C0800000000)) >> 32);
-  data = (data & UINT64_C(0xC0C0C0C0CCCCCC88))
-      | ((data & UINT64_C(0x3030303033220000)) >> 16);
-  data = (data & UINT64_C(0x8080A0A0A8A8AAAA))
-      | ((data & UINT64_C(0x4040505054545500)) >> 8);
-// phase 2
-  data = (data & UINT64_C(0xF0F0F0F0F0E0C080))
-      | ((data & UINT64_C(0x0F0E0C0800000000)) >> 32);
-  data = (data & UINT64_C(0xC0C0C0C0CCCCCC88))
-      | ((data & UINT64_C(0x3030303033220000)) >> 16);
-  data = (data & UINT64_C(0x8080A0A0A8A8AAAA))
-      | ((data & UINT64_C(0x4040505054545500)) >> 8);
-//  return DistortBitsWhite1(FlipHorizonalBits(data));
+//// phase 1
+//  data = (data & UINT64_C(0xF0F0F0F0F0E0C080))
+//      | ((data & UINT64_C(0x0F0E0C0800000000)) >> 32);
+//  data = (data & UINT64_C(0xC0C0C0C0CCCCCC88))
+//      | ((data & UINT64_C(0x3030303033220000)) >> 16);
+//  data = (data & UINT64_C(0x8080A0A0A8A8AAAA))
+//      | ((data & UINT64_C(0x4040505054545500)) >> 8);
+//// phase 2
+//  data = (data & UINT64_C(0xF0F0F0F0F0E0C080))
+//      | ((data & UINT64_C(0x0F0E0C0800000000)) >> 32);
+//  data = (data & UINT64_C(0xC0C0C0C0CCCCCC88))
+//      | ((data & UINT64_C(0x3030303033220000)) >> 16);
+//  data = (data & UINT64_C(0x8080A0A0A8A8AAAA))
+//      | ((data & UINT64_C(0x4040505054545500)) >> 8);
+//  return data;
+  return DistortBitsWhite1(FlipHorizonalBits(data));
 }
 
 // TODO : 分割統治法を使うように変更する
-uint64_t UndistortBitsWhite1(const uint64_t data) {
+uint64_t UndistortBitsWhite1(uint64_t data) {
   return (data & UINT64_C(0x0101010101010101))
       | ((data & UINT64_C(0x0002020202020202)) << 8)
       | ((data & UINT64_C(0x0000040404040404)) << 16)
@@ -260,16 +275,34 @@ uint64_t UndistortBitsWhite1(const uint64_t data) {
 }
 
 // TODO : 高速な実装に書き換える
-uint64_t UndistortBitsWhite2(const uint64_t data) {
-  return TransposeBits(UndistortBitsWhite1(data));
+uint64_t UndistortBitsWhite2(uint64_t data) {
+// phase 1
+  data = (data & UINT64_C(0xFF7F3F1F00000000))
+      | ((data & UINT64_C(0x000000000F070301)) << 4);
+  data = (data & UINT64_C(0xFF7F0000F0700000))
+      | ((data & UINT64_C(0x00003F1F00003010)) << 2);
+  data = (data & UINT64_C(0xFF00FC00F000C000))
+      | ((data & UINT64_C(0x007F007C00700040)) << 1);
+// phase 2
+  data = (data & UINT64_C(0xF0F0F0F0F0E0C080))
+      | ((data & UINT64_C(0x0F0E0C0800000000)) >> 32);
+  data = (data & UINT64_C(0xC0C0C0C0CCCCCC88))
+      | ((data & UINT64_C(0x3030303033220000)) >> 16);
+  data = (data & UINT64_C(0x8080A0A0A8A8AAAA))
+      | ((data & UINT64_C(0x4040505054545500)) >> 8);
+  return data;
+//  return FlipHorizonalBits(UndistortBitsBlack1(data));
 }
 
-uint64_t UndistortBitsBlack1(const uint64_t data) {
+uint64_t UndistortBitsBlack1(uint64_t data) {
   return DistortBitsWhite1(data);
 }
 
 // TODO : 高速な実装に書き換える
-uint64_t UndistortBitsBlack2(const uint64_t data) {
+uint64_t UndistortBitsBlack2(uint64_t data) {
   return FlipHorizonalBits(UndistortBitsWhite1(data));
 }
+
+} // namespace bitwise
+} // namespace bitwise
 

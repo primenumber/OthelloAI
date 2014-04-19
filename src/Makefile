@@ -21,7 +21,9 @@ TestGameState:
 	mv Board/*.o .
 	make -C Test all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
 	mv Test/*.o .
-	$(CPPC) $(CPPFLAGS2) -o TestGameState Test.o GameTree.o GameState.o basic_GameState.o LineState.o Base3.o Position.o State.o $(LIBS)
+	make -C Lib all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv Lib/*.o .
+	$(CPPC) $(CPPFLAGS2) -o TestGameState Test.o GameTree.o GameState.o basic_GameState.o LineState.o Base3.o Position.o State.o BitwiseOperations.o $(LIBS)
 othelloAI.o: GameServer/othelloAI.cpp
 	$(CPPC) $(CPPFLAGS2) -o othelloAI.o -c GameServer/othelloAI.cpp
 ogs: board.o server.o gametimer.o othelloAI.o
@@ -31,7 +33,9 @@ ogs2:
 	mv Board/*.o .
 	make -C GameServer2 all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
 	mv GameServer2/*.o .
-	$(CPPC) $(CPPFLAGS2) -o ogs Server.o GameTimer.o OthelloAI.o GameState.o $(LIBS)
+	make -C Lib all CPPC='$(CPPC)' CPPFLAGS='$(CPPFLAGS2)'
+	mv Lib/*.o .
+	$(CPPC) $(CPPFLAGS2) -o ogs Server.o GameTimer.o OthelloAI.o GameTree.o GameState.o basic_GameState.o LineState.o Base3.o Position.o State.o BitwiseOperations.o $(LIBS)
 rndo: GameServer/random.cpp board.o
 	$(CPPC) $(CPPFLAGS2) -o rndo board.o GameServer/random.cpp $(LIBS)
 clean:

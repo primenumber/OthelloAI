@@ -27,7 +27,7 @@ int dfs(const board::Board& board, const board::State state,
       if (pass) {
         return CalcWinPoint(board, state);
       } else {
-        return -dfs(board, invertState(state), depth, -beta, -alpha, true,
+        return -dfs(board, invertState(state), depth-1, -beta, -alpha, true,
                     stones);
       }
     }

@@ -121,7 +121,7 @@ class basic_GameState {
   int CountBlack() const;
   int CountWhite() const;
   std::pair<int, int> CountStones() const {
-    return make_pair(CountBlack(), CountWhite());
+    return std::make_pair(CountBlack(), CountWhite());
   }
   basic_GameState& Put(const Position position, const State state);
   std::string ToString() const;
@@ -137,49 +137,26 @@ class basic_GameState {
   LineState PutOrIdCross(LineState line, const int index,
       const int line_length, const std::pair<int, int> xy_pair,
       const State state);
-//  static uint8_t MaskShiftRow8(const uint64_t data, const int index);
-//  static uint64_t MaskShiftRow64(const uint64_t data, const int index);
-//  static uint64_t GetBitMask(const Position position);
-//  static uint64_t GetPutBits(const uint8_t row, const uint8_t column,
-//    const uint8_t cross_white, const uint8_t cross_black,
-//    const std::pair<int, int> xy_pair);
-//  static uint8_t Column2Uint8(uint64_t data);
-//  static uint8_t CrossWhite2Uint8(uint64_t data);
-//  static uint8_t CrossBlack2Uint8(uint64_t data);
-//  static uint64_t Uint82Column(const uint8_t data);
-//  static uint64_t Uint82CrossWhite(const uint8_t data);
-//  static uint64_t Uint82CrossBlack(const uint8_t data);
-//  static uint64_t TransposeBits(uint64_t data);
-//  static uint64_t FlipHorizonalBits(uint64_t data);
-//  static uint64_t DistortBitsWhite1(uint64_t data);
-//  static uint64_t DistortBitsWhite2(uint64_t data);
-//  static uint64_t DistortBitsBlack1(uint64_t data);
-//  static uint64_t DistortBitsBlack2(uint64_t data);
-//  static uint64_t UndistortBitsWhite1(uint64_t data);
-//  static uint64_t UndistortBitsWhite2(uint64_t data);
-//  static uint64_t UndistortBitsBlack1(uint64_t data);
-//  static uint64_t UndistortBitsBlack2(uint64_t data);
-//  static uint64_t LinePuttableBits(const uint64_t black_state,
-//      const uint64_t white_state, const int index, const int line_length,
-//      const State state);
 };
 
 class GameState : public basic_GameState {
  public:
   constexpr static int kValueMax = 1000000;
   GameState() : basic_GameState(), state_(State::BLACK), recent_position_() {};
-  GameState(const uint64_t black_state, const uint64_t white_state, State state,
-            const Position recent_position)
+  GameState(const uint64_t black_state, const uint64_t white_state,
+            const State state, const Position recent_position)
       : basic_GameState(black_state, white_state), state_(state),
         recent_position_(recent_position) {}
   GameState(const GameState&) = default;
   GameState(GameState&&) = default;
+  virtual ~GameState() noexcept(true) {};
   GameState& operator=(const GameState& lhs) = default;
   GameState& operator=(GameState&& lhs) = default;
   State GetState() const { return state_; }
   bool isPuttable(const Position position) const {
     return basic_GameState::isPuttable(position, state_);
   }
+  using basic_GameState::GetPuttable;
   uint64_t GetPuttable() const { return basic_GameState::GetPuttable(state_); }
 //  std::vector<Position> GetPuttablePosition();
 //  std::vector<GameState> GetPuttableGameState();
@@ -210,9 +187,15 @@ class GameTree : private GameState {
   using GameState::atPosition;
   using GameState::GetState;
   using GameState::GetRecentPut;
+  using GameState::IsPassed;
+  using GameState::CountStones;
+  using GameState::CountBlack;
+  using GameState::CountWhite;
   GameTree() = default;
-  GameTree(const GameState& that) : GameState(that) {};
-  GameTree(GameState&& that) : GameState(std::move(that)) {};
+  GameTree(const GameState& that) : GameState(that), children_(),
+      value_() {};
+  GameTree(GameState&& that) : GameState(std::move(that)), children_(),
+      value_() {};
   GameTree(const GameTree& that) = default;
   GameTree(GameTree&& that) = default;
   std::unique_ptr<GameTree> Put(const Position position);

@@ -78,7 +78,7 @@ void Search::Calc(std::chrono::milliseconds calc_time) {
   auto begin_search = std::chrono::system_clock::now();
   auto stones = countBoard(board_);
   int stone_nums = stones.first + stones.second;
-  for (; depth <= 20; ++depth) {
+  for (; depth <= 20; depth++) {
     int alpha = -1000000;
     const int beta = 1000000;
     game_tree_root_->Search(depth, -beta, -alpha, false);
